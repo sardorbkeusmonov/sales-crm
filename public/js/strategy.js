@@ -3,10 +3,10 @@ let _stratView = 'kpi';
 let _planType = 'monthly';
 let _decFilter = 'all';
 let _decEdit = null;
-let _kpiMonth = '';
+let _stratKpiMonth = '';
 
 function renderStrategy() {
-  if (!_kpiMonth) _kpiMonth = today().slice(0, 7);
+  if (!_stratKpiMonth) _stratKpiMonth = today().slice(0, 7);
   const el = document.getElementById('tStrategy');
   if (!el) return;
   el.innerHTML = `
@@ -43,11 +43,11 @@ function _getStratKpi(month) {
 }
 
 function _renderStratKpi(el) {
-  const kpi = _getStratKpi(_kpiMonth);
-  const [yr, mo] = _kpiMonth.split('-');
+  const kpi = _getStratKpi(_stratKpiMonth);
+  const [yr, mo] = _stratKpiMonth.split('-');
   const monthName = MONTHS[parseInt(mo) - 1] + ' ' + yr;
 
-  const monthSales = (D.sales || []).filter(s => s.date && s.date.startsWith(_kpiMonth));
+  const monthSales = (D.sales || []).filter(s => s.date && s.date.startsWith(_stratKpiMonth));
   const actualSales = monthSales.length;
   const actualRevenue = monthSales.reduce((sum, s) => {
     const p = gP(s.pid);
@@ -92,15 +92,15 @@ function _kpiCard(label, actual, target, unit, color, bg, isMoney) {
 }
 
 function _stratKpiNav(dir) {
-  const d = new Date(_kpiMonth + '-01');
+  const d = new Date(_stratKpiMonth + '-01');
   d.setMonth(d.getMonth() + dir);
-  _kpiMonth = d.toISOString().slice(0, 7);
+  _stratKpiMonth = d.toISOString().slice(0, 7);
   _renderStratBody();
 }
 
 function openStratKpiEdit() {
-  const kpi = _getStratKpi(_kpiMonth);
-  const [yr, mo] = _kpiMonth.split('-');
+  const kpi = _getStratKpi(_stratKpiMonth);
+  const [yr, mo] = _stratKpiMonth.split('-');
   document.getElementById('stratKpiMonthLbl').textContent = MONTHS[parseInt(mo) - 1] + ' ' + yr;
   document.getElementById('stratKpiSales').value = kpi.salesTarget || '';
   document.getElementById('stratKpiRevenue').value = kpi.revenueTarget || '';
@@ -110,13 +110,13 @@ function openStratKpiEdit() {
 
 async function saveStratKpi() {
   const kpi = {
-    month: _kpiMonth,
+    month: _stratKpiMonth,
     salesTarget: parseInt(document.getElementById('stratKpiSales').value) || 0,
     revenueTarget: parseInt(document.getElementById('stratKpiRevenue').value) || 0,
     activeTarget: parseInt(document.getElementById('stratKpiActive').value) || 0,
   };
   D.bizKpi = D.bizKpi || [];
-  const idx = D.bizKpi.findIndex(k => k.month === _kpiMonth);
+  const idx = D.bizKpi.findIndex(k => k.month === _stratKpiMonth);
   if (idx >= 0) D.bizKpi[idx] = kpi; else D.bizKpi.push(kpi);
   await window.FS.saveBizKpi(kpi);
   document.getElementById('stratKpiModalW').classList.remove('show');

@@ -2,14 +2,17 @@
 function buildWarehouseTabs(){
   const ic=s=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s}</svg>`;
   const taskIcW=ic('<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6"/><path d="M9 16h4"/>');
+  const videoIcW=ic('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>');
   document.getElementById('tabbar').innerHTML=
     `<button class="tab on" id="whtab_stock" onclick="goTab('tWarehouse','Ombor',this)">${ic('<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/><circle cx="10" cy="20.5" r="1.5"/><circle cx="18" cy="20.5" r="1.5"/>')}<span style="font-size:13px">Ombor</span></button>
      <button class="tab" id="whtab_orders" onclick="goTab('tDelivery','Buyurtmalar',this)">${ic('<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>')}<span style="font-size:13px">Buyurtmalar</span></button>
-     <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIcW}<span style="font-size:13px">Topshiriq</span></button>`;
+     <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIcW}<span style="font-size:13px">Topshiriq</span></button>
+     <button class="tab" onclick="goTab('tVideo','Video muloqot',this)">${videoIcW}<span style="font-size:13px">Video</span></button>`;
   buildSidebar([
     {id:'tWarehouse',label:'Ombor',icon:ic('<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/><circle cx="10" cy="20.5" r="1.5"/><circle cx="18" cy="20.5" r="1.5"/>')},
     {id:'tDelivery',label:'Buyurtmalar',icon:ic('<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>')},
     {id:'tTasks',label:'Topshiriqlar',icon:taskIcW},
+    {id:'tVideo',label:'Video muloqot',icon:videoIcW},
   ]);
   setSidebarActive('tWarehouse');
 }

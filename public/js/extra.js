@@ -1,241 +1,369 @@
 // ===== KPI TIZIMI =====
-var KPI_UNITS=['ta','so\'m','%','kun','soat','dona'];
-var KPI_PERIODS=['Kunlik','Haftalik','Oylik'];
-var _kpiEdit=null;
+let _kpiViewMonth = '';
+let _kpiSelFilter = 'all';
+let _kpiEditId = null;
 
-function kpiIcon(){
-  const _ic=s=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s}</svg>`;
-  return _ic('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>');
+function _kpiMonth() {
+  if (!_kpiViewMonth) _kpiViewMonth = today().slice(0, 7);
+  return _kpiViewMonth;
 }
 
-function buildKPITabs(){
-  // Admin va sotuvchi uchun KPI tab qo'shamiz
-  var tabbarEl=document.getElementById('tabbar');
-  var sidebarTabsEl=document.getElementById('sidebarTabs');
-  // Bu funksiya buildAdminTabs, buildSellerTabs ichida chaqiriladi
+function _kpiWeekStart() {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const mon = new Date(d);
+  mon.setDate(d.getDate() + diff);
+  return mon.toISOString().slice(0, 10);
 }
 
-function getKpiCurrent(goal){
-  var sid=goal.sid;
-  var sel=gS(sid);
-  if(!sel) return goal.manualValue||0;
-  var now=new Date();
-  var sales=D.sales.filter(function(s){return String(s.sid)===String(sid);});
-
-  if(goal.period==='Kunlik'){
-    var td=today();
-    sales=sales.filter(function(s){return s.date===td;});
-  } else if(goal.period==='Haftalik'){
-    var w0=new Date(now);
-    w0.setDate(now.getDate()-now.getDay());
-    var wStr=w0.toISOString().slice(0,10);
-    sales=sales.filter(function(s){return s.date>=wStr;});
-  } else {
-    var mStr=now.toISOString().slice(0,7);
-    sales=sales.filter(function(s){return s.date&&s.date.slice(0,7)===mStr;});
+function _kpiActual(type, sid, period, month) {
+  const t = today(), ws = _kpiWeekStart();
+  const inR = date => {
+    if (!date) return false;
+    if (period === 'day') return date === t;
+    if (period === 'week') return date >= ws && date <= t;
+    return date.startsWith(month);
+  };
+  if (type === 'sotuv_soni')
+    return (D.sales||[]).filter(s => String(s.sid)===String(sid) && inR(s.date)).length;
+  if (type === 'konversiya') {
+    const sales = (D.sales||[]).filter(s => String(s.sid)===String(sid) && s.date && s.date.startsWith(month)).length;
+    const seller = gS(Number(sid));
+    const igId = seller && seller.igId;
+    if (!igId) return 0;
+    const ig = (TA.igData||{})[igId]||{};
+    let dm = 0;
+    Object.keys(ig).forEach(d => { if (d.startsWith(month)) dm += Number(ig[d].dm||0); });
+    return dm > 0 ? Math.round(sales / dm * 1000) / 10 : 0;
   }
-
-  if(goal.autoType==='sotuv_soni') return sales.length;
-  if(goal.autoType==='sotuv_daromad') return sales.reduce(function(a){return a+(sel.comm||0);},0);
-  if(goal.autoType==='dm_soni'){
-    var dm=0;
-    Object.values(TA&&TA.igData||{}).forEach(function(ig){
-      Object.values(ig||{}).forEach(function(day){dm+=Number(day.dm)||0;});
+  if (type === 'dm_soni') {
+    let total = 0;
+    Object.values(TA.igData||{}).forEach(ig => {
+      Object.keys(ig||{}).forEach(d => { if (inR(d)) total += Number(ig[d].dm||0); });
     });
-    return dm;
+    return total;
   }
-  if(goal.autoType==='budjet'){
-    var bdj=0;
-    Object.values(TA&&TA.igData||{}).forEach(function(ig){
-      Object.values(ig||{}).forEach(function(day){bdj+=Number(day.budget)||0;});
+  if (type === 'budjet') {
+    let total = 0;
+    Object.values(TA.igData||{}).forEach(ig => {
+      Object.keys(ig||{}).forEach(d => { if (inR(d)) total += Number(ig[d].budget||0); });
     });
-    return bdj;
+    return total;
   }
-  if(goal.autoType==='yetkazilgan'){
-    return (D.sales||[]).filter(function(s){
-      var delivered=s.status==='delivered';
-      if(!delivered) return false;
-      if(goal.period==='Kunlik') return s.date===today();
-      if(goal.period==='Oylik') return s.date&&s.date.slice(0,7)===new Date().toISOString().slice(0,7);
-      return true;
-    }).length;
+  if (type === 'dm_narxi') {
+    const dm = _kpiActual('dm_soni', sid, period, month);
+    const bj = _kpiActual('budjet', sid, period, month);
+    return dm > 0 ? Math.round(bj / dm) : 0;
   }
-  return Number(goal.manualValue)||0;
+  if (type === 'video_soni') {
+    const goal = (D.kpiGoals||[]).find(g => g.type==='video_soni' && String(g.sid)===String(sid) && g.month===month);
+    return goal ? (goal.manualActual||0) : 0;
+  }
+  return 0;
 }
 
-function kpiColor(pct){
-  if(pct>=80) return {bg:'#F0FDF4',bar:'#22C55E',text:'#15803D'};
-  if(pct>=50) return {bg:'#FFFBEB',bar:'#F59E0B',text:'#D97706'};
-  return {bg:'#FEF2F2',bar:'#EF4444',text:'#DC2626'};
+function _kpiPT(monthly, period) {
+  if (period === 'day') return Math.round(monthly / 22);
+  if (period === 'week') return Math.round(monthly / 4);
+  return monthly;
 }
 
-function renderKpiCard(goal,isAdmin){
-  var cur=getKpiCurrent(goal);
-  var pct=goal.target>0?Math.min(100,Math.round(cur/goal.target*100)):0;
-  var r=44; var circ=2*Math.PI*r;
-  var dash=circ*(1-pct/100);
-  var col=pct>=80?'#22C55E':pct>=50?'#F59E0B':'#EF4444';
-  var colBg=pct>=80?'#F0FDF4':pct>=50?'#FFFBEB':'#FEF2F2';
-  var colTx=pct>=80?'#15803D':pct>=50?'#B45309':'#DC2626';
-  var periods={Kunlik:{bg:'#EFF6FF',c:'#1D4ED8'},Haftalik:{bg:'#EDE9FE',c:'#6D28D9'},Oylik:{bg:'#F0FDF4',c:'#166534'}};
-  var pd=periods[goal.period]||{bg:'#F1F5F9',c:'#475569'};
-  var sel=gS(goal.sid); var selName=sel?sel.name:'—';
-  var adminInfo=isAdmin?'<div style="font-size:12px;color:#888;margin-bottom:8px;display:flex;align-items:center;gap:4px"><span>👤</span><span>'+selName+'</span></div>':'';
-  var gid=goal.id;
-  var adminBtns=isAdmin?('<div style="display:flex;gap:6px;margin-top:12px"><button onclick="openEditKpi(\'' +gid+ '\')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#185FA5;font-family:inherit">Tahrirlash</button><button onclick="deleteKpi(\'' +gid+ '\')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #fee2e2;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#dc2626;font-family:inherit">O&apos;chirish</button></div>'):'';
-  var manualInput=goal.autoType==='manual'&&!isAdmin?('<div style="margin-top:10px;display:flex;gap:8px;align-items:center"><span style="font-size:13px;color:#888">Hozirgi qiymat:</span><input type="number" value="'+(goal.manualValue||0)+'" onchange="updateKpiManual(\'' +gid+ '\',this.value)" style="width:80px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit" min="0"><span style="font-size:13px;color:#888">'+goal.unit+'</span></div>'):'';
-  return'<div class="sc-card" style="margin-bottom:10px">'+
-    adminInfo+
-    '<div style="display:flex;align-items:center;gap:14px">'+
-      '<div style="position:relative;flex-shrink:0">'+
-        '<svg width="100" height="100" viewBox="0 0 100 100">'+
-          '<circle cx="50" cy="50" r="44" fill="'+colBg+'" stroke="#e5e7eb" stroke-width="8"/>'+
-          '<circle cx="50" cy="50" r="44" fill="none" stroke="'+col+'" stroke-width="8" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+dash.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset .8s ease"/>'+
-          '<text x="50" y="46" text-anchor="middle" font-size="20" font-weight="800" fill="'+colTx+'" font-family="inherit">'+pct+'%</text>'+
-          '<text x="50" y="62" text-anchor="middle" font-size="11" fill="#999" font-family="inherit">'+fmt(cur)+'/'+fmt(goal.target)+'</text>'+
-        '</svg>'+
-      '</div>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:6px">'+goal.title+'</div>'+
-        '<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;background:'+pd.bg+';color:'+pd.c+';margin-bottom:6px">'+goal.period+'</span>'+
-        '<div style="height:6px;background:#f0f0ec;border-radius:6px;overflow:hidden;margin-bottom:4px">'+
-          '<div style="height:100%;border-radius:6px;background:'+col+';width:'+pct+'%;transition:width .8s ease"></div>'+
-        '</div>'+
-        '<div style="font-size:12px;color:#999">'+fmt(cur)+' '+goal.unit+' / '+fmt(goal.target)+' '+goal.unit+'</div>'+
-      '</div>'+
-    '</div>'+
-    manualInput+adminBtns+'</div>';
+function _kpiColor(pct) {
+  if (pct >= 80) return { bar:'#22C55E', text:'#15803D', bg:'#F0FDF4' };
+  if (pct >= 50) return { bar:'#F59E0B', text:'#B45309', bg:'#FFFBEB' };
+  return { bar:'#EF4444', text:'#DC2626', bg:'#FEF2F2' };
 }
 
+function _kpiSave() {
+  if (window.FS) window.FS.saveSettings({
+    admin:D.admin, nUid:D.nUid, nPid:D.nPid, nSid:D.nSid, nIgId:D.nIgId,
+    bonusConfig:D.bonusConfig, igDailyDM:D.igDailyDM, tahlilData:TA,
+    expenses:D.expenses, activeAds:D.activeAds, kpiGoals:D.kpiGoals||[]
+  });
+}
 
-function renderKPI(){
-  var el=document.getElementById('kpiContent');
-  if(!el) return;
-  var isAdmin=D.user&&D.user.isAdmin;
-  var isMob=D.user&&D.user.role==='mobilograf';
-  var userId=isAdmin?null:(D.user?D.user.id:null);
+function renderKPI() {
+  const el = document.getElementById('kpiContent');
+  if (!el) return;
+  const month = _kpiMonth();
+  const isAdmin = D.user && D.user.isAdmin;
+  const uid = D.user ? D.user.id : null;
+  const role = D.user ? D.user.role : null;
+  const [yr, mo] = month.split('-');
+  const monthName = MONTHS[parseInt(mo)-1] + ' ' + yr;
+  const navHtml = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;margin-top:8px">
+      <button onclick="_kpiNavMonth(-1)" style="background:white;border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:18px;cursor:pointer;font-family:inherit">&#8249;</button>
+      <span style="font-size:15px;font-weight:700;color:#1a1a1a">${monthName}</span>
+      <button onclick="_kpiNavMonth(1)" style="background:white;border:1px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:18px;cursor:pointer;font-family:inherit">&#8250;</button>
+    </div>`;
+  if (isAdmin) _renderKpiAdmin(el, month, navHtml);
+  else _renderKpiWorker(el, month, navHtml, uid, role);
+}
 
-  var myGoals=isAdmin
-    ? (D.kpiGoals||[])
-    : (D.kpiGoals||[]).filter(function(g){return String(g.sid)===String(userId);});
+function _kpiNavMonth(dir) {
+  const d = new Date(_kpiMonth() + '-01');
+  d.setMonth(d.getMonth() + dir);
+  _kpiViewMonth = d.toISOString().slice(0, 7);
+  renderKPI();
+}
 
-  var addBtn=isAdmin?
-    '<button onclick="openAddKpi()" style="width:100%;padding:12px;border-radius:10px;background:#185FA5;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:14px;margin-top:8px">+ Maqsad qo\'shish</button>':'';
+function _renderKpiAdmin(el, month, navHtml) {
+  const sellers = (D.sellers||[]).filter(s => s.login && ['sotuvchi','targetolog','mobilograf'].includes(s.role));
+  const chipSt = on => `flex-shrink:0;padding:6px 14px;border-radius:10px;border:2px solid ${on?'#185FA5':'#e5e7eb'};background:${on?'#EFF6FF':'white'};color:${on?'#185FA5':'#888'};font-size:13px;font-weight:700;cursor:pointer;font-family:inherit`;
+  const filterHtml = [
+    `<button onclick="_kpiSetFilter('all')" style="${chipSt(_kpiSelFilter==='all')}">Hammasi</button>`,
+    ...sellers.map(s => `<button onclick="_kpiSetFilter('${s.id}')" style="${chipSt(String(_kpiSelFilter)===String(s.id))}">${s.name}</button>`)
+  ].join('');
+  const shown = _kpiSelFilter === 'all' ? sellers : sellers.filter(s => String(s.id)===String(_kpiSelFilter));
+  let cards = '';
+  shown.forEach(sel => {
+    const goals = (D.kpiGoals||[]).filter(g => String(g.sid)===String(sel.id) && g.month===month && g.type);
+    cards += _kpiSelSection(sel, goals, month, true);
+  });
+  el.innerHTML = `
+    <button onclick="openAddKpi()" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;margin-bottom:12px">+ Maqsad belgilash</button>
+    ${navHtml}
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px">${filterHtml}</div>
+    ${cards || '<div style="text-align:center;padding:32px;color:#aaa;font-size:14px">Bu oy uchun maqsad belgilanmagan</div>'}`;
+}
 
-  if(!myGoals.length){
-    el.innerHTML=addBtn+
-      '<div style="text-align:center;padding:48px 20px">'+
-        '<div style="font-size:48px;margin-bottom:12px">🎯</div>'+
-        '<div style="font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:6px">'+(isAdmin?'Hali maqsad qo\'shilmagan':'Sizga hali maqsad belgilanmagan')+'</div>'+
-        '<div style="font-size:13px;color:#999">'+(isAdmin?'Har bir ishchiga KPI maqsad belgilang':'Admin maqsad belgilaydi')+'</div>'+
-      '</div>';
-    return;
+function _kpiSetFilter(val) { _kpiSelFilter = val; renderKPI(); }
+
+function _kpiSelSection(sel, goals, month, isAdmin) {
+  const rl = {sotuvchi:'Sotuvchi', targetolog:'Targetolog', mobilograf:'Mobilograf'}[sel.role]||sel.role;
+  return `
+    <div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:4px 0">
+        <div style="width:34px;height:34px;border-radius:50%;${avSt(sel.ai||0)};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">${ini(sel.name)}</div>
+        <div><div style="font-size:14px;font-weight:700;color:#1a1a1a">${sel.name}</div><div style="font-size:11px;color:#aaa">${rl}</div></div>
+      </div>
+      ${goals.length ? goals.map(g => _kpiGoalCard(g, month, isAdmin)).join('') : '<div style="background:#f9fafb;border-radius:12px;padding:12px;text-align:center;color:#aaa;font-size:13px;margin-bottom:12px">Maqsad yo\'q</div>'}
+    </div>`;
+}
+
+function _renderKpiWorker(el, month, navHtml, uid, role) {
+  const myGoals = (D.kpiGoals||[]).filter(g => String(g.sid)===String(uid) && g.month===month && g.type);
+  const mainGoals = myGoals.filter(g => g.type!=='konversiya' && g.type!=='dm_narxi');
+  let sumPct = 0;
+  mainGoals.forEach(g => {
+    const act = _kpiActual(g.type, uid, 'month', month);
+    sumPct += g.monthlyTarget > 0 ? Math.min(100, Math.round(act/g.monthlyTarget*100)) : 0;
+  });
+  const avgPct = mainGoals.length > 0 ? Math.round(sumPct / mainGoals.length) : 0;
+  const col = _kpiColor(avgPct);
+  const summary = myGoals.length ? `
+    <div style="background:${col.bg};border-radius:14px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:14px">
+      <div style="width:56px;height:56px;border-radius:50%;background:${col.bar};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span style="font-size:15px;font-weight:800;color:#fff">${avgPct}%</span>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:${col.text}">Oylik umumiy progress</div>
+        <div style="font-size:13px;color:#555;margin-top:2px">${avgPct>=80?"Ajoyib natija! Davom eting 💪":avgPct>=50?"Yaxshi ketmoqda, kuchaytiring ⚡":"Kuch bering, oldinga! 🎯"}</div>
+      </div>
+    </div>` : '';
+  const empty = `
+    <div style="text-align:center;padding:48px 20px;color:#aaa">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+      <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-top:12px">Maqsad belgilanmagan</div>
+      <div style="font-size:13px;color:#aaa;margin-top:4px">Admin siz uchun KPI maqsad belgilaydi</div>
+    </div>`;
+  el.innerHTML = navHtml + summary + (myGoals.length ? myGoals.map(g => _kpiGoalCard(g, month, false)).join('') : empty);
+}
+
+function _kpiGoalCard(goal, month, isAdmin) {
+  const gid = goal.id;
+  const isCurrent = month === today().slice(0, 7);
+  const LABELS = { sotuv_soni:'Sotuvlar soni', konversiya:'Konversiya %', dm_soni:'DM soni', budjet:'Oylik budjet', dm_narxi:'DM narxi', video_soni:'Video soni' };
+  const UNITS = { sotuv_soni:'ta', konversiya:'%', dm_soni:'ta', budjet:"so'm", dm_narxi:"so'm", video_soni:'ta' };
+  const title = LABELS[goal.type]||goal.type;
+  const unit = UNITS[goal.type]||'';
+  const isMoney = goal.type==='budjet' || goal.type==='dm_narxi';
+  const fmtV = v => isMoney ? fmt(Math.round(v)) : (Number.isInteger(v)?String(v):String(Math.round(v*10)/10));
+  const adminBtns = isAdmin ? `
+    <div style="display:flex;gap:6px">
+      <button onclick="openEditKpi('${gid}')" style="background:#EFF6FF;color:#185FA5;border:none;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit">&#9998;</button>
+      <button onclick="deleteKpi('${gid}')" style="background:#FEF2F2;color:#dc2626;border:none;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit">&#128465;</button>
+    </div>` : '';
+
+  if (goal.type === 'konversiya' || goal.type === 'dm_narxi') {
+    const actual = _kpiActual(goal.type, goal.sid, 'month', month);
+    const target = goal.monthlyTarget;
+    const isLower = goal.type === 'dm_narxi';
+    const displayPct = target > 0
+      ? (isLower ? Math.min(100, Math.round(target/Math.max(actual,1)*100)) : Math.min(100, Math.round(actual/target*100)))
+      : 0;
+    const col = _kpiColor(displayPct);
+    return `
+      <div style="background:white;border-radius:14px;border:1px solid #e5e7eb;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:14px;font-weight:700;color:#1a1a1a">${title}</span>${adminBtns}
+        </div>
+        <div style="font-size:22px;font-weight:700;color:${col.text}">${fmtV(actual)} <span style="font-size:13px;color:#aaa;font-weight:400">${unit}</span></div>
+        <div style="font-size:12px;color:#aaa;margin-top:2px">${isLower?'Maqsad (maksimum)':'Maqsad'}: ${fmtV(target)} ${unit}</div>
+        <div style="background:#f3f4f6;border-radius:8px;height:7px;margin-top:8px;overflow:hidden">
+          <div style="width:${displayPct}%;background:${col.bar};height:100%;border-radius:8px;transition:width .4s"></div>
+        </div>
+        <div style="font-size:12px;color:${col.text};font-weight:700;margin-top:4px">${displayPct}%${isLower?' (past = yaxshi)':''}</div>
+      </div>`;
   }
 
-  var html=addBtn;
+  const isManual = goal.type === 'video_soni';
+  const periodsToShow = (isCurrent && !isManual)
+    ? [
+        { key:'day',   label:'Kunlik',   target:_kpiPT(goal.monthlyTarget,'day'),  actual:_kpiActual(goal.type,goal.sid,'day',month) },
+        { key:'week',  label:'Haftalik', target:_kpiPT(goal.monthlyTarget,'week'), actual:_kpiActual(goal.type,goal.sid,'week',month) },
+        { key:'month', label:'Oylik',    target:goal.monthlyTarget,                actual:_kpiActual(goal.type,goal.sid,'month',month) },
+      ]
+    : [{ key:'month', label:isCurrent?'Oylik':'Oylik natija', target:goal.monthlyTarget, actual:_kpiActual(goal.type,goal.sid,'month',month) }];
 
-  if(isAdmin){
-    var sellers=D.sellers.filter(function(s){return s.login&&s.role;});
-    sellers.forEach(function(sel){
-      var selGoals=myGoals.filter(function(g){return String(g.sid)===String(sel.id);});
-      if(!selGoals.length) return;
-      html+='<div style="font-size:12px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px">'+sel.name+'</div>';
-      html+=selGoals.map(function(g){return renderKpiCard(g,true);}).join('');
-    });
-  } else {
-    html+=myGoals.map(function(g){return renderKpiCard(g,false);}).join('');
-  }
-
-  el.innerHTML=html;
-}
-
-function openAddKpi(){
-  _kpiEdit=null;
-  var m=document.getElementById('kpiModalW');if(!m)return;
-  document.getElementById('kpiModalTitle').textContent='+ Maqsad qo\'shish';
-  document.getElementById('kpiTitle').value='';
-  document.getElementById('kpiTarget').value='';
-  document.getElementById('kpiUnit').value='ta';
-  document.getElementById('kpiPeriod').value='Oylik';
-  document.getElementById('kpiAutoType').value='manual';
-  var sel=document.getElementById('kpiSeller');
-  var sellers=(D.sellers||[]).filter(function(s){return s.login&&s.role&&s.role!=='admin';});
-  sel.innerHTML=sellers.map(function(s){
-    var roleNames={sotuvchi:'Sotuvchi',targetolog:'Targetolog',mobilograf:'Mobilograf',omborchi:'Omborchi',yetkazuvchi:'Yetkazuvchi'};
-    return '<option value="'+s.id+'">'+s.name+' — '+(roleNames[s.role]||s.role)+'</option>';
+  const rows = periodsToShow.map((p,i) => {
+    const pct = p.target > 0 ? Math.min(100, Math.round(p.actual/p.target*100)) : 0;
+    const col = _kpiColor(pct);
+    return `
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;${i<periodsToShow.length-1?'border-bottom:1px solid #f5f5f3':''}">
+        <div style="width:72px;font-size:12px;color:#888;font-weight:600;flex-shrink:0">${p.label}</div>
+        <div style="flex:1;background:#f3f4f6;border-radius:6px;height:7px;overflow:hidden">
+          <div style="width:${pct}%;background:${col.bar};height:100%;border-radius:6px;transition:width .4s"></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:${col.text};white-space:nowrap;flex-shrink:0">${fmtV(p.actual)}/${fmtV(p.target)} ${unit}</div>
+        <div style="width:32px;font-size:11px;font-weight:700;color:${col.text};text-align:right;flex-shrink:0">${pct}%</div>
+      </div>`;
   }).join('');
-  m.style.display='flex';
+
+  const manualInput = isManual && !isAdmin ? `
+    <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #f3f4f6">
+      <span style="font-size:13px;color:#888">Oylik holat:</span>
+      <input type="number" value="${_kpiActual('video_soni',goal.sid,'month',month)}"
+        onchange="updateKpiManual('${gid}',this.value)"
+        style="width:80px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit" min="0">
+      <span style="font-size:13px;color:#888">${unit}</span>
+    </div>` : '';
+
+  return `
+    <div style="background:white;border-radius:14px;border:1px solid #e5e7eb;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:14px;font-weight:700;color:#1a1a1a">${title}</span>${adminBtns}
+      </div>
+      ${rows}${manualInput}
+    </div>`;
 }
 
-function setKpiPeriod(val){
-  document.getElementById('kpiPeriod').value=val;
+// ===== ADMIN MODAL =====
+const _KPI_TYPES = {
+  sotuvchi:   [{ value:'sotuv_soni', label:'Sotuvlar soni', unit:'ta' }, { value:'konversiya', label:'Konversiya % (maqsad)', unit:'%' }],
+  targetolog: [{ value:'dm_soni', label:'DM soni', unit:'ta' }, { value:'budjet', label:'Oylik budjet', unit:"so'm" }, { value:'dm_narxi', label:'DM narxi (maqsad)', unit:"so'm" }],
+  mobilograf: [{ value:'video_soni', label:'Video soni', unit:'ta' }],
+};
+
+function openAddKpi() {
+  _kpiEditId = null;
+  document.getElementById('kpiModalTitle').textContent = 'Maqsad belgilash';
+  document.getElementById('kpiMonth').value = _kpiMonth();
+  document.getElementById('kpiTarget').value = '';
+  _buildKpiSelOpts(null);
+  document.getElementById('kpiModalW').classList.add('show');
 }
 
-function openEditKpi(id){
-  var goal=(D.kpiGoals||[]).find(function(g){return g.id===id;});
-  if(!goal) return;
-  _kpiEdit=id;
-  document.getElementById('kpiModalTitle').textContent='Maqsadni tahrirlash';
-  document.getElementById('kpiTitle').value=goal.title||'';
-  document.getElementById('kpiTarget').value=goal.target||'';
-  document.getElementById('kpiUnit').value=goal.unit||'ta';
-  document.getElementById('kpiPeriod').value=goal.period||'Oylik';
-  document.getElementById('kpiAutoType').value=goal.autoType||'manual';
-  var manualRow=document.getElementById('kpiManualRow');
-  if(manualRow) manualRow.style.display=goal.autoType==='manual'?'block':'none';
-  var sel=document.getElementById('kpiSeller');
-  var sellers=D.sellers.filter(function(s){return s.login&&s.role;});
-  sel.innerHTML=sellers.map(function(s){return '<option value="'+s.id+'"'+(String(s.id)===String(goal.sid)?' selected':'')+'>'+s.name+' ('+s.role+')</option>';}).join('');
-  var _m=document.getElementById('kpiModalW');if(_m)_m.style.display='flex';
+function openEditKpi(id) {
+  const goal = (D.kpiGoals||[]).find(g => g.id === id);
+  if (!goal) return;
+  _kpiEditId = id;
+  document.getElementById('kpiModalTitle').textContent = 'Maqsadni tahrirlash';
+  document.getElementById('kpiMonth').value = goal.month || _kpiMonth();
+  _buildKpiSelOpts(goal.sid);
+  setTimeout(() => {
+    const t = document.getElementById('kpiType');
+    if (t) { t.value = goal.type||''; _onKpiTypeChange(); }
+    document.getElementById('kpiTarget').value = goal.monthlyTarget||'';
+  }, 30);
+  document.getElementById('kpiModalW').classList.add('show');
 }
 
-function onKpiAutoTypeChange(val){
-  var manualRow=document.getElementById('kpiManualRow');
-  if(manualRow) manualRow.style.display=val==='manual'?'block':'none';
-  var unitMap={sotuv_soni:'ta',sotuv_daromad:'so\'m',dm_soni:'ta',manual:''};
-  if(unitMap[val]) document.getElementById('kpiUnit').value=unitMap[val];
+function _buildKpiSelOpts(selectedSid) {
+  const sellers = (D.sellers||[]).filter(s => s.login && _KPI_TYPES[s.role]);
+  const sel = document.getElementById('kpiSeller');
+  if (!sel) return;
+  sel.innerHTML = sellers.map(s => {
+    const rl = {sotuvchi:'Sotuvchi', targetolog:'Targetolog', mobilograf:'Mobilograf'}[s.role]||s.role;
+    return `<option value="${s.id}" data-role="${s.role}" ${String(s.id)===String(selectedSid)?'selected':''}>${s.name} — ${rl}</option>`;
+  }).join('');
+  _onKpiSellerChange();
 }
 
-function saveKpi(){
-  var title=document.getElementById('kpiTitle').value.trim();
-  var target=Number(document.getElementById('kpiTarget').value);
-  var unit=document.getElementById('kpiUnit').value;
-  var period=document.getElementById('kpiPeriod').value;
-  var autoType=document.getElementById('kpiAutoType').value;
-  var sid=document.getElementById('kpiSeller').value;
-  if(!title||!target||!sid){showToast('Barcha maydonlarni to\'ldiring');return;}
-  if(_kpiEdit){
-    var idx=(D.kpiGoals||[]).findIndex(function(g){return g.id===_kpiEdit;});
-    if(idx>=0){D.kpiGoals[idx]=Object.assign(D.kpiGoals[idx],{title,target,unit,period,autoType,sid});}
+function _onKpiSellerChange() {
+  const sel = document.getElementById('kpiSeller');
+  if (!sel) return;
+  const opt = sel.options[sel.selectedIndex];
+  const role = opt ? opt.getAttribute('data-role') : null;
+  const types = _KPI_TYPES[role]||[];
+  const typeEl = document.getElementById('kpiType');
+  if (!typeEl) return;
+  typeEl.innerHTML = types.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
+  _onKpiTypeChange();
+}
+
+function _onKpiTypeChange() {
+  const typeEl = document.getElementById('kpiType');
+  const sel = document.getElementById('kpiSeller');
+  if (!typeEl || !sel) return;
+  const opt = sel.options[sel.selectedIndex];
+  const role = opt ? opt.getAttribute('data-role') : null;
+  const found = (_KPI_TYPES[role]||[]).find(t => t.value === typeEl.value);
+  const lbl = document.getElementById('kpiUnitLabel');
+  if (lbl) lbl.textContent = found ? found.unit : '';
+}
+
+function saveKpi() {
+  const sid = document.getElementById('kpiSeller').value;
+  const type = document.getElementById('kpiType').value;
+  const month = document.getElementById('kpiMonth').value || _kpiMonth();
+  const target = parseFloat(document.getElementById('kpiTarget').value)||0;
+  if (!sid || !type) { showToast('Ishchi va metrikni tanlang!'); return; }
+  if (!target) { showToast('Maqsad qiymatini kiriting!'); return; }
+  D.kpiGoals = D.kpiGoals||[];
+  if (_kpiEditId) {
+    const idx = D.kpiGoals.findIndex(g => g.id === _kpiEditId);
+    if (idx >= 0) D.kpiGoals[idx] = {...D.kpiGoals[idx], sid, type, month, monthlyTarget: target};
   } else {
-    D.kpiGoals=D.kpiGoals||[];
-    D.kpiGoals.push({id:'k'+Date.now(),sid,title,target,unit,period,autoType,manualValue:0,createdAt:today()});
+    D.kpiGoals = D.kpiGoals.filter(g => !(String(g.sid)===String(sid) && g.type===type && g.month===month));
+    D.kpiGoals.push({ id:'k'+Date.now(), sid, type, month, monthlyTarget: target, manualActual: 0 });
   }
-  window.FS&&window.FS.saveKpiGoals&&window.FS.saveKpiGoals(D.kpiGoals);
+  _kpiSave();
   closeKpiModal();
   renderKPI();
-  showToast('Saqlandi!');
+  showToast('Saqlandi ✓');
 }
 
-function deleteKpi(id){
-  if(!confirm('Bu maqsadni o\'chirishni tasdiqlaysizmi?')) return;
-  D.kpiGoals=(D.kpiGoals||[]).filter(function(g){return g.id!==id;});
-  window.FS&&window.FS.saveKpiGoals&&window.FS.saveKpiGoals(D.kpiGoals);
+function deleteKpi(id) {
+  if (!confirm("Bu maqsadni o'chirasizmi?")) return;
+  D.kpiGoals = (D.kpiGoals||[]).filter(g => g.id !== id);
+  _kpiSave();
   renderKPI();
-  showToast('O\'chirildi!');
+  showToast("O'chirildi");
 }
 
-function updateKpiManual(id,val){
-  var goal=(D.kpiGoals||[]).find(function(g){return g.id===id;});
-  if(!goal) return;
-  goal.manualValue=Number(val)||0;
-  window.FS&&window.FS.saveKpiGoals&&window.FS.saveKpiGoals(D.kpiGoals);
+function updateKpiManual(id, val) {
+  const goal = (D.kpiGoals||[]).find(g => g.id === id);
+  if (!goal) return;
+  goal.manualActual = Number(val)||0;
+  _kpiSave();
   renderKPI();
 }
 
-function closeKpiModal(){
-  var m=document.getElementById('kpiModalW');if(m)m.style.display='none';
+function closeKpiModal() {
+  document.getElementById('kpiModalW').classList.remove('show');
+  _kpiEditId = null;
 }
+
+// Legacy compat
+function kpiColor(pct) { return _kpiColor(pct); }
+function getKpiCurrent(g) { return _kpiActual(g.type||g.autoType||'sotuv_soni', g.sid, 'month', _kpiMonth()); }
+function renderKpiCard(g, isAdmin) { return _kpiGoalCard(g, _kpiMonth(), isAdmin); }
+function buildKPITabs() {}
+function onKpiAutoTypeChange() {}
+function setKpiPeriod() {}
 
 
 // ===== TELEGRAM XABARNOMA =====

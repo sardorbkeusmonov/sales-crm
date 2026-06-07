@@ -108,6 +108,9 @@ input,select,button{font-family:inherit;font-size:14px}
   #hamburgerBtn{display:none!important}
   #contentArea .topbar{display:none!important}
   #contentArea .tabbar{display:none!important}
+  .mw{align-items:center;padding:16px}
+  .bs{border-radius:16px;max-width:500px;padding:24px 24px 28px;width:100%}
+  .bsh{display:none}
 }
 #igSelW.show{display:flex!important;}
 .wh-sticky{position:sticky;top:0;background:#f5f5f0;z-index:5;padding:0 0 10px}

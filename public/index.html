@@ -294,6 +294,11 @@
     <div id="kpiContent"></div>
   </div>
 
+  <!-- VIDEO MULOQOT -->
+  <div id="tVideo" class="sc" style="display:none">
+    <div id="videoContent"></div>
+  </div>
+
 
   <!-- SOTUVCHI: DASHBOARD -->
   <div id="tMyD" class="sc" style="display:none">
@@ -370,29 +375,22 @@
 
   <!-- KPI MODAL -->
   <div class="cw" id="kpiModalW">
-    <div class="cb" style="max-width:400px;width:100%;max-height:90vh;overflow-y:auto">
-      <div class="bt" id="kpiModalTitle">Maqsad qo'shish</div>
-      <div class="fg"><label class="fl">Ishchi</label><select class="inp" id="kpiSeller"></select></div>
-      <div class="fg"><label class="fl">Maqsad nomi</label><input class="inp" id="kpiTitle" placeholder="Oylik sotuv maqsadi"></div>
-      <div class="fg"><label class="fl">Hisoblash turi</label><select class="inp" id="kpiAutoType" onchange="onKpiAutoTypeChange(this.value)">
-          <optgroup label="Qo'lda">
-            <option value="manual">Qo'lda kiritiladi</option>
-          </optgroup>
-          <optgroup label="Sotuvchi (auto)">
-            <option value="sotuv_soni">Sotuv soni</option>
-            <option value="sotuv_daromad">Sotuvchi daromadi</option>
-          </optgroup>
-          <optgroup label="Targetolog (auto)">
-            <option value="dm_soni">DM soni</option>
-            <option value="budjet">Budjet sarfi ($)</option>
-          </optgroup>
-          <optgroup label="Omborchi (auto)">
-            <option value="yetkazilgan">Yetkazilgan buyurtmalar</option>
-          </optgroup>
-        </select></div>
-      <div style="display:flex;gap:10px"><div class="fg" style="flex:2"><label class="fl">Maqsad qiymati</label><input class="inp" type="number" id="kpiTarget" placeholder="50" min="0"></div><div class="fg" style="flex:1"><label class="fl">Birlik</label><select class="inp" id="kpiUnit"><option value="ta">ta</option><option value="so'm">so'm</option><option value="%">%</option><option value="dona">dona</option></select></div></div>
-      <div class="fg"><label class="fl">Davr</label><select class="inp" id="kpiPeriod"><option value="Kunlik">Kunlik</option><option value="Haftalik">Haftalik</option><option value="Oylik" selected>Oylik</option></select></div>
-      <div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1;padding:12px;border-radius:10px" onclick="closeKpiModal()">Bekor</button><button class="btn btnp" style="flex:1;padding:12px;border-radius:10px;font-weight:700" onclick="saveKpi()">Saqlash</button></div>
+    <div class="cb" style="max-width:420px;width:100%;max-height:90vh;overflow-y:auto">
+      <div class="bt" id="kpiModalTitle">Maqsad belgilash</div>
+      <div class="fg"><label class="fl">Ishchi</label><select class="inp" id="kpiSeller" onchange="_onKpiSellerChange()"></select></div>
+      <div class="fg"><label class="fl">Metrika</label><select class="inp" id="kpiType" onchange="_onKpiTypeChange()"></select></div>
+      <div class="fg"><label class="fl">Oy</label><input class="inp" type="month" id="kpiMonth"></div>
+      <div class="fg">
+        <label class="fl">Oylik maqsad</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="inp" type="number" id="kpiTarget" placeholder="Masalan: 100" min="0" style="flex:1">
+          <span id="kpiUnitLabel" style="font-size:14px;color:#888;font-weight:600;min-width:32px">ta</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn" style="flex:1;padding:12px" onclick="closeKpiModal()">Bekor</button>
+        <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveKpi()">Saqlash</button>
+      </div>
     </div>
   </div>
 
@@ -847,6 +845,7 @@
     <button onclick="confirmIgSel()" style="width:100%;padding:14px;background:#185FA5;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit">Davom etish →</button>
   </div>
 </div>
+<script src="https://meet.jit.si/external_api.js"></script>
 <script src="js/core.js"></script>
 <script src="js/tabs.js"></script>
 <script src="js/seller.js"></script>
@@ -857,6 +856,7 @@
 <script src="js/tasks.js"></script>
 <script src="js/strategy.js"></script>
 <script src="js/extra.js"></script>
+<script src="js/video.js"></script>
 <script type="module" src="js/firebase.js"></script>
 </body>
 </html>

@@ -16,9 +16,16 @@ function getStockStatus(left){
 function buildMobilografTabs(){
   const _icM=s=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s}</svg>`;
   const taskIcM=_icM('<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6"/><path d="M9 16h4"/>');
+  const videoIcM=_icM('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>');
+  const kpiIcM=_icM('<circle cx="12" cy="12" r="1"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M13 3.055a9 9 0 1 0 7.941 7.945"/><path d="M15 6v3h3l3 -3h-3v-3z"/><path d="M15 9l-3 3"/>');
+  document.getElementById('tabbar').innerHTML=`
+    <button class="tab on" onclick="goTab('tKPI','KPI Maqsadlar',this)">${kpiIcM}<span style="font-size:13px">KPI</span></button>
+    <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIcM}<span style="font-size:13px">Topshiriq</span></button>
+    <button class="tab" onclick="goTab('tVideo','Video muloqot',this)">${videoIcM}<span style="font-size:13px">Video</span></button>`;
   buildSidebar([
-    {id:'tKPI',label:'KPI Maqsadlar',icon:_icM('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>')},
+    {id:'tKPI',label:'KPI Maqsadlar',icon:kpiIcM},
     {id:'tTasks',label:'Topshiriqlar',icon:taskIcM},
+    {id:'tVideo',label:'Video muloqot',icon:videoIcM},
   ]);
   setSidebarActive('tKPI');
 }
@@ -27,10 +34,12 @@ function buildDeliveryTabs(){
   const ic=s=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s}</svg>`;
   const delIc=ic('<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>');
   const taskIcD=ic('<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6"/><path d="M9 16h4"/>');
+  const videoIcD=ic('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>');
   document.getElementById('tabbar').innerHTML=
     `<button class="tab on" onclick="goTab('tDelivery','Buyurtmalar',this)">${delIc}<span style="font-size:13px">Buyurtmalar</span></button>
-     <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIcD}<span style="font-size:13px">Topshiriq</span></button>`;
-  buildSidebar([{id:'tDelivery',label:'Buyurtmalar',icon:delIc},{id:'tTasks',label:'Topshiriqlar',icon:taskIcD}]);
+     <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIcD}<span style="font-size:13px">Topshiriq</span></button>
+     <button class="tab" onclick="goTab('tVideo','Video muloqot',this)">${videoIcD}<span style="font-size:13px">Video</span></button>`;
+  buildSidebar([{id:'tDelivery',label:'Buyurtmalar',icon:delIc},{id:'tTasks',label:'Topshiriqlar',icon:taskIcD},{id:'tVideo',label:'Video muloqot',icon:videoIcD}]);
   setSidebarActive('tDelivery');
 }
 

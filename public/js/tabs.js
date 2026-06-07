@@ -1,13 +1,15 @@
 ﻿function buildTargetologTabs(){
   const icT=s=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s}</svg>`;
   const chartIc=icT('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>');
-  const kpiIcT=icT('<circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>');
+  const kpiIcT=icT('<circle cx="12" cy="12" r="1"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M13 3.055a9 9 0 1 0 7.941 7.945"/><path d="M15 6v3h3l3 -3h-3v-3z"/><path d="M15 9l-3 3"/>');
   const taskIcT=icT('<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6"/><path d="M9 16h4"/>');
+  const videoIcT=icT('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>');
   document.getElementById('tabbar').innerHTML=`
     <button class="tab on" onclick="goTab('tTahlil','Tahlil',this)">${chartIc}<span style="font-size:13px">Tahlil</span></button>
     <button class="tab" onclick="goTab('tKPI','KPI',this)">${kpiIcT}<span style="font-size:13px">KPI</span></button>
-    <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIcT}<span style="font-size:13px">Topshiriq</span></button>`;
-  buildSidebar([{id:'tTahlil',label:'Tahlil',icon:chartIc},{id:'tKPI',label:'KPI Maqsadlar',icon:kpiIcT},{id:'tTasks',label:'Topshiriqlar',icon:taskIcT}]);
+    <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIcT}<span style="font-size:13px">Topshiriq</span></button>
+    <button class="tab" onclick="goTab('tVideo','Video muloqot',this)">${videoIcT}<span style="font-size:13px">Video</span></button>`;
+  buildSidebar([{id:'tTahlil',label:'Tahlil',icon:chartIc},{id:'tKPI',label:'KPI Maqsadlar',icon:kpiIcT},{id:'tTasks',label:'Topshiriqlar',icon:taskIcT},{id:'tVideo',label:'Video muloqot',icon:videoIcT}]);
   setSidebarActive('tTahlil');
 }
 function buildSellerTabs(){
@@ -27,21 +29,23 @@ function buildSellerTabs(){
     <button class="tab" onclick="goTab('tTarix','Daromadim',this)">${I2.income}<span style="font-size:13px">Daromadim</span></button>
     <button class="tab" onclick="goTab('tMyOrders','Buyurtmalar',this)">${ic2('<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>')}<span style="font-size:13px">Buyurtmalar</span></button>
     <button class="tab" onclick="goTab('tTahlil','Tahlil',this)">${I2.chart}<span style="font-size:13px">Tahlil</span></button>
-    <button class="tab" onclick="goTab('tKPI','KPI',this)">${ic2('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>')}<span style="font-size:13px">KPI</span></button>
-    <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIc2}<span style="font-size:13px">Topshiriq</span></button>`;
+    <button class="tab" onclick="goTab('tKPI','KPI',this)">${ic2('<circle cx="12" cy="12" r="1"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M13 3.055a9 9 0 1 0 7.941 7.945"/><path d="M15 6v3h3l3 -3h-3v-3z"/><path d="M15 9l-3 3"/>')}<span style="font-size:13px">KPI</span></button>
+    <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIc2}<span style="font-size:13px">Topshiriq</span></button>
+    <button class="tab" onclick="goTab('tVideo','Video muloqot',this)">${ic2('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>')}<span style="font-size:13px">Video</span></button>`;
   buildSidebar([
     {id:'tMyD',label:'Sotuv',icon:I2.dash},
     {id:'tMyJ',label:'Jamoa',icon:I2.team},
     {id:'tTarix',label:'Daromadim',icon:I2.income},
     {id:'tMyOrders',label:'Buyurtmalar',icon:ic2('<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>')},
     {id:'tTahlil',label:'Tahlil',icon:I2.chart},
-    {id:'tKPI',label:'KPI Maqsadlar',icon:ic2('<circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>')},
+    {id:'tKPI',label:'KPI Maqsadlar',icon:ic2('<circle cx="12" cy="12" r="1"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M13 3.055a9 9 0 1 0 7.941 7.945"/><path d="M15 6v3h3l3 -3h-3v-3z"/><path d="M15 9l-3 3"/>')},
     {id:'tTasks',label:'Topshiriqlar',icon:taskIc2},
+    {id:'tVideo',label:'Video muloqot',icon:ic2('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>')},
   ]);
   setSidebarActive('tMyD');
 }
 
-const ALL_TABS=['tDash','tJamoa','tProd','tSellers','tTahlil','tProfile','tSofFoyda','tMyD','tTarix','tMyJ','tWarehouse','tDelivery','tMyOrders','tMob','tKPI','tTasks','tStrategy'];
+const ALL_TABS=['tDash','tJamoa','tProd','tSellers','tTahlil','tProfile','tSofFoyda','tMyD','tTarix','tMyJ','tWarehouse','tDelivery','tMyOrders','tMob','tKPI','tTasks','tStrategy','tVideo'];
 function hideAll(){ALL_TABS.forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.style.paddingTop='';}});const fb=document.getElementById('tabFilterBar');if(fb)fb.style.display='none';}
 function goT(id,title){hideAll();document.getElementById(id).style.display='block';document.getElementById('ttitle').textContent=title;}
 function goTab(id,title,el){
@@ -70,6 +74,7 @@ function goTab(id,title,el){
   if(id==='tTasks')renderTasks();
   if(id==='tStrategy')renderStrategy();
   if(id==='tSofFoyda')renderSofFoyda();
+  if(id==='tVideo')renderVideo();
   if(id==='tMyD')renderMyD();
   if(id==='tTarix')renderTarix();
   if(id==='tMyJ'){renderMyJ();mjView('s',document.querySelector('#tMyJ .sb'));}
@@ -152,6 +157,7 @@ function buildAdminTabs(){
     <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIc}<span style="font-size:13px">Topshiriq</span></button>
     <button class="tab" onclick="goTab('tStrategy','Biznes strategiyasi',this)">${stratIc}<span style="font-size:13px">Strategiya</span></button>
     <button class="tab" onclick="goTab('tSofFoyda','Sof foyda',this)">${sofIc}<span style="font-size:13px">Foyda</span></button>
+    <button class="tab" onclick="goTab('tVideo','Video muloqot',this)">${ic('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>')}<span style="font-size:13px">Video</span></button>
     <button class="tab" onclick="goTab('tProfile','Profilim',this)">${ICONS.profile}<span style="font-size:13px">Profil</span></button>`;
   buildSidebar([
     {id:'tDash',label:'Umumiy',icon:ICONS.dash},
@@ -159,10 +165,11 @@ function buildAdminTabs(){
     {id:'tProd',label:'Mahsulotlar',icon:ICONS.prod},
     {id:'tSellers',label:'Ishchilar',icon:ICONS.staff},
     {id:'tTahlil',label:'Tahlil',icon:ICONS.chart},
-    {id:'tKPI',label:'KPI Maqsadlar',icon:ic('<circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>')},
+    {id:'tKPI',label:'KPI Maqsadlar',icon:ic('<circle cx="12" cy="12" r="1"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M13 3.055a9 9 0 1 0 7.941 7.945"/><path d="M15 6v3h3l3 -3h-3v-3z"/><path d="M15 9l-3 3"/>')},
     {id:'tTasks',label:'Topshiriqlar',icon:taskIc},
     {id:'tStrategy',label:'Biznes strategiyasi',icon:stratIc},
     {id:'tSofFoyda',label:'Sof foyda',icon:sofIc},
+    {id:'tVideo',label:'Video muloqot',icon:ic('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>')},
     {id:'tProfile',label:'Profil',icon:ICONS.profile},
   ]);
   setSidebarActive('tDash');
