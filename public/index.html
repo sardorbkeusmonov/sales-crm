@@ -400,46 +400,40 @@
 <!-- CONFIRM SOTUV -->
 <div class="cw" id="confW">
   <div class="cb" style="max-height:90vh;overflow-y:auto">
-    <div style="font-size:16px;font-weight:700;margin-bottom:4px">Buyurtma ma'lumotlari</div>
-    <div style="font-size:13px;color:#185FA5;margin-bottom:14px;font-weight:600" id="confTxt"></div>
-    
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:16px;font-weight:700">&#128722; Buyurtma</div>
+      <button onclick="closeConf()" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="cartItemsList" style="margin-bottom:4px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#EFF6FF;border-radius:10px;margin-bottom:16px">
+      <span style="font-size:14px;font-weight:700;color:#185FA5">Jami to'lov:</span>
+      <span id="cartTotalAmt" style="font-size:16px;font-weight:800;color:#185FA5">0 so'm</span>
+    </div>
     <div class="fg"><label class="fl">Mijoz ismi <span style="color:#dc2626">*</span></label>
       <input class="inp" type="text" id="custName" placeholder="Ism Familiya"></div>
-    
     <div class="fg" style="position:relative"><label class="fl">Telefon raqami <span style="color:#dc2626">*</span></label>
       <input class="inp" type="tel" id="custPhone" placeholder="XX XXX XXXX" maxlength="9" oninput="fmtPhone(this)" style="padding-left:68px"><span style="position:absolute;left:12px;bottom:10px;font-size:15px;color:#555;pointer-events:none;font-weight:500">+998</span></div>
     <div class="fg"><label class="fl">Manzil <span style="color:#dc2626">*</span></label>
       <input class="inp" type="text" id="custAddress" placeholder="Viloyat, Shahar, Ko'cha"></div>
-    
     <div class="fg">
       <label class="fl">To'lov turi <span style="color:#dc2626">*</span></label>
       <div style="display:flex;gap:8px">
-        <button id="payCardBtn" onclick="setPayType('card')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #185FA5;background:#EFF6FF;color:#185FA5;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">💳 Karta</button>
-        <button id="payCashBtn" onclick="setPayType('cash')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #e5e7eb;background:white;color:#888;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">💵 Naqd</button>
+        <button id="payCardBtn" onclick="setPayType('card')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #185FA5;background:#EFF6FF;color:#185FA5;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">&#128179; Karta</button>
+        <button id="payCashBtn" onclick="setPayType('cash')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #e5e7eb;background:white;color:#888;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">&#128181; Naqd</button>
       </div>
       <input type="hidden" id="custPayType" value="card">
     </div>
-    
-    <div class="fg"><label class="fl">Soni <span style="color:#dc2626">*</span></label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <button onclick="changeQty(-1)" style="width:40px;height:40px;border-radius:10px;border:1px solid #ddd;background:#f5f5f0;font-size:22px;cursor:pointer;font-family:inherit;line-height:1">−</button>
-        <input class="inp" type="number" id="custQty" value="1" min="1" max="99" style="text-align:center;font-size:18px;font-weight:700;width:80px">
-        <button onclick="changeQty(1)" style="width:40px;height:40px;border-radius:10px;border:1px solid #ddd;background:#f5f5f0;font-size:22px;cursor:pointer;font-family:inherit;line-height:1">+</button>
-      </div></div>
     <div class="fg"><label class="fl">Izoh</label>
       <input class="inp" type="text" id="custNote" placeholder="Masalan: bugun kechgacha yetkazish kerak"></div>
-    
     <div class="fg">
       <label class="fl">To'lov cheki</label>
       <div id="receiptUploadArea" onclick="document.getElementById('receiptFile').click()" style="border:2px dashed #e5e7eb;border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:#fafaf8">
         <div id="receiptPreview" style="display:none"><img id="receiptImg" style="max-width:100%;max-height:160px;border-radius:8px;object-fit:contain"></div>
-        <div id="receiptPlaceholder" style="color:#999;font-size:13px">📷 Chek rasmini yuklang</div>
+        <div id="receiptPlaceholder" style="color:#999;font-size:13px">&#128247; Chek rasmini yuklang</div>
       </div>
       <input type="file" id="receiptFile" accept="image/*" style="display:none" onchange="handleReceiptImg(this)">
     </div>
-    
     <div id="confErr" style="font-size:13px;color:#dc2626;margin-bottom:8px;display:none">Ism, telefon va manzilni to'ldiring!</div>
-    
     <div style="display:flex;gap:10px">
       <button class="btn" style="flex:1;padding:12px" onclick="closeConf()">Bekor</button>
       <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="confirmSell()">Saqlash &#10003;</button>
@@ -479,8 +473,8 @@
     <div class="bsh"></div>
     <div class="bt" id="selShT">Sotuvchi qo'shish</div>
     <div class="fg"><label class="fl">To'liq ism</label><input class="inp" type="text" id="sNm" placeholder="Ism Familiya"></div>
-    <div class="fg"><label class="fl">Login</label><input class="inp" type="text" id="sLg" placeholder="login123"></div>
-    <div class="fg"><label class="fl">Parol</label><input class="inp" type="text" id="sPw" placeholder="parol"></div>
+    <div class="fg" id="loginFg"><label class="fl">Login</label><input class="inp" type="text" id="sLg" placeholder="login123"></div>
+    <div class="fg" id="passFg"><label class="fl">Parol</label><input class="inp" type="text" id="sPw" placeholder="parol"></div>
     <div class="fg" id="salaryFg" style="display:none"><label class="fl">Oylik maosh (so'm)</label><input class="inp" type="number" id="sSalary" placeholder="Masalan: 1000000"></div>
     <div class="fg" id="commFg"><label class="fl" id="commLabel">1 sotuv uchun haq (so'm)</label><input class="inp" type="number" id="sComm" placeholder="Masalan: 10000"></div>
     <div class="fg">
@@ -717,13 +711,10 @@
 <!-- RASM TANLASH MODALI -->
 <div class="cw" id="imgSelW">
   <div class="cb" style="max-width:380px;max-height:85vh;overflow-y:auto">
-    <div style="font-size:16px;font-weight:700;margin-bottom:4px" id="imgSelTitle">Mahsulot rangini tanlang</div>
-    <div style="font-size:13px;color:#888;margin-bottom:14px">Mijoz buyurtma qilgan rangni tanlang</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px" id="imgSelTitle">Rasmni tanlang</div>
+    <div style="font-size:13px;color:#888;margin-bottom:14px">Mijoz buyurtma qilgan rasmga bosing</div>
     <div id="imgSelGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"></div>
-    <div style="display:flex;gap:10px">
-      <button class="btn" style="flex:1;padding:12px" onclick="closeImgSel()">Bekor</button>
-      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="confirmImgSel_img()">Davom etish →</button>
-    </div>
+    <button class="btn" style="width:100%;padding:12px" onclick="closeImgSel()">Bekor</button>
   </div>
 </div>
 <!-- ADD ACTIVE AD MODAL -->

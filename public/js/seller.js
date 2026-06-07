@@ -360,7 +360,7 @@ function renderSotuv(){
   const searchEl=document.getElementById('sotuvSearch');
   const q=searchEl?searchEl.value.trim().toLowerCase():'';
   const allSP=q?D.products.filter(p=>p.name.toLowerCase().includes(q)):D.products;
-  if(!allSP.length){document.getElementById('prodList').innerHTML='<div style="text-align:center;padding:30px;color:#999;font-size:13px">Mahsulotlar yuklanmoqda...</div>';return;}
+  if(!allSP.length){document.getElementById('prodList').innerHTML='<div style="text-align:center;padding:30px;color:#999;font-size:13px">Mahsulotlar yuklanmoqda...</div>';renderCartBar();return;}
   const _SP=20,_spg=window._sotuvPage||1,_st=allSP.length,_ss=(_spg-1)*_SP;
   const myProds=allSP.slice(_ss,_ss+_SP);
   const _sh='<div style="font-size:13px;font-weight:700;color:#999;padding:4px 2px 8px">Mahsulotlar '+(_ss+1)+'–'+Math.min(_ss+_SP,_st)+' / '+_st+'</div>';
@@ -371,7 +371,9 @@ function renderSotuv(){
     _spn='<div style="padding:12px 0;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap"><button onclick="if(window._sotuvPage>1){window._sotuvPage--;renderSotuv()}" '+((_spg===1)?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;opacity:'+((_spg===1)?'.4':'1')+'">&#8249;</button>'+_bt+'<button onclick="if(window._sotuvPage<'+_tp+'){window._sotuvPage++;renderSotuv()}" '+((_spg===_tp)?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;opacity:'+((_spg===_tp)?'.4':'1')+'">&#8250;</button></div>';
   }
   document.getElementById('prodList').innerHTML=(_st?_sh:'')+myProds.map(p=>{
+    if(!D.cart) D.cart=[];
     const cnt=D.sales.filter(s=>String(s.sid)===String(D.user.id)&&String(s.pid)===String(p.id)).length;
+    const cartQty=(D.cart||[]).filter(c=>String(c.pid)===String(p.id)).reduce((a,c)=>a+c.qty,0);
     const _left=getStockLeft(p);
     const _st=getStockStatus(_left);
     const _badge=_left===null?'':_left===0
@@ -391,37 +393,60 @@ function renderSotuv(){
       <div style="font-size:13px;color:#185FA5;font-weight:600;margin-bottom:3px">${fmt(p.price)} so'm</div>
       <div style="font-size:14px;color:#888">Men sotdim: ${cnt} ta</div>
     </div>
-    <button style="width:100%;background:#185FA5;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px" onclick="askSell(${p.id})">Sotildi &#10003;</button>
+    <button style="width:100%;${cartQty?'background:#EFF6FF;color:#185FA5;border:2px solid #185FA5':'background:#185FA5;color:#fff;border:none'};border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px" onclick="addToCart(${p.id})">${cartQty?'&#128722; Savatchada ('+cartQty+' ta) +':'&#128722; Savatchaga +'}</button>
   </div>
 </div>`;
   }).join('')+_spn;
+  renderCartBar();
 }
-function askSell(id){
+function askSell(id){addToCart(id);}
+
+function addToCart(id){
+  if(!D.cart) D.cart=[];
+  D.cartAddMode=true;
   D.pPid=id;
   const p=gP(id);
   D.saleSelectedImg=p.img||'';
-  const imgs=p.imgs&&p.imgs.length>1?p.imgs:(p.img?[p.img]:[]);
+  const rawImgs=(Array.isArray(p.imgs)?p.imgs:[]).filter(Boolean);
+  const imgs=rawImgs.length>1?rawImgs:(p.img?[p.img]:[]);
   if(imgs.length>1){
-    // Bir necha rasm - avval rang tanlash
-    document.getElementById('imgSelTitle').textContent=p.name+' - rang tanlang';
+    document.getElementById('imgSelTitle').textContent=p.name;
     const grid=document.getElementById('imgSelGrid');
     grid.innerHTML='';
-    imgs.forEach(function(url,i){
+    imgs.forEach(function(url){
       const div=document.createElement('div');
-      div.id='imgOpt_'+i;
-      div.style.cssText='border-radius:12px;border:2px solid #e5e7eb;overflow:hidden;cursor:pointer;background:#f8f8f6';
-      div.onclick=function(){selectSaleImg(url,i);};
+      div.style.cssText='border-radius:12px;border:2px solid #e5e7eb;overflow:hidden;cursor:pointer;background:#f8f8f6;transition:border-color .15s';
+      div.onmouseenter=function(){this.style.borderColor='#185FA5';};
+      div.onmouseleave=function(){this.style.borderColor='#e5e7eb';};
+      div.onclick=function(){
+        D.saleSelectedImg=url;
+        document.getElementById('imgSelW').classList.remove('show');
+        addToCartContinue();
+      };
       const img=document.createElement('img');
       img.src=url;
-      img.style.cssText='width:100%;height:120px;object-fit:contain;display:block;padding:8px';
+      img.style.cssText='width:100%;height:120px;object-fit:contain;display:block;padding:8px;pointer-events:none';
       div.appendChild(img);
       grid.appendChild(div);
     });
-    selectSaleImg(imgs[0],0);
     document.getElementById('imgSelW').classList.add('show');
     return;
   }
-  askSellContinue();
+  addToCartContinue();
+}
+
+function addToCartContinue(){
+  if(!D.cart) D.cart=[];
+  const pid=D.pPid;
+  const p=gP(pid);
+  if(!p) return;
+  const si=D.saleSelectedImg||p.img||'';
+  const existing=D.cart.find(c=>String(c.pid)===String(pid)&&c.selectedImg===si);
+  if(existing){existing.qty++;}
+  else{D.cart.push({pid:p.id,qty:1,selectedImg:si,price:p.price});}
+  D.cartAddMode=false;
+  showToast(p.name+' savatchaga qo\'shildi!');
+  renderSotuv();
 }
 
 function selectSaleImg(url,idx){
@@ -439,7 +464,7 @@ function closeImgSel(){
 
 function confirmImgSel_img(){
   document.getElementById('imgSelW').classList.remove('show');
-  askSellContinue();
+  if(D.cartAddMode){addToCartContinue();}else{askSellContinue();}
 }
 
 function askSellContinue(){
@@ -466,16 +491,104 @@ function updateIgSel(){
     }
   });
 }
-function confirmIgSel(){document.getElementById('igSelW').classList.remove('show');const p=gP(D.pPid);document.getElementById('confTxt').textContent='"'+p.name+'" - '+fmt(p.price)+' so\'m sotuvini tasdiqlaysizmi?';document.getElementById('confW').classList.add('show');}
-function closeIgSel(){document.getElementById('igSelW').classList.remove('show');D.pPid=null;D.saleIgId=null;}
+function confirmIgSel(){
+  document.getElementById('igSelW').classList.remove('show');
+  if(!D.cart||!D.cart.length) return;
+  renderCartItems();
+  document.getElementById('custName').value='';
+  document.getElementById('custPhone').value='';
+  document.getElementById('custAddress').value='';
+  const noteEl=document.getElementById('custNote');if(noteEl)noteEl.value='';
+  document.getElementById('custPayType').value='card';
+  setPayType('card');
+  document.getElementById('confErr').style.display='none';
+  const prevEl=document.getElementById('receiptPreview');
+  const placEl=document.getElementById('receiptPlaceholder');
+  if(prevEl)prevEl.style.display='none';
+  if(placEl)placEl.style.display='block';
+  D_receiptImg=null;
+  document.getElementById('confW').classList.add('show');
+}
+function closeIgSel(){document.getElementById('igSelW').classList.remove('show');D.saleIgId=null;}
 
 let _sellLock=false;
 
-function changeQty(delta){
-  const inp=document.getElementById('custQty');
-  let v=parseInt(inp.value)||1;
-  v=Math.max(1,Math.min(99,v+delta));
-  inp.value=v;
+function renderCartBar(){
+  if(!D.cart) D.cart=[];
+  let bar=document.getElementById('cartBar');
+  if(!D.cart.length){if(bar)bar.style.display='none';return;}
+  const totalQty=D.cart.reduce((a,it)=>a+it.qty,0);
+  const totalPrice=D.cart.reduce((a,it)=>a+(it.price*it.qty),0);
+  const isDesktop=window.innerWidth>=768;
+  if(!bar){bar=document.createElement('div');bar.id='cartBar';document.body.appendChild(bar);}
+  bar.style.cssText='position:fixed;'+(isDesktop?'bottom:20px':'bottom:70px')+';left:50%;transform:translateX(-50%);z-index:9999;border-radius:16px;display:flex;align-items:center;padding:0;box-shadow:0 4px 24px rgba(24,95,165,0.35);min-width:300px;max-width:calc(100vw - 32px);overflow:hidden';
+  bar.innerHTML='<div onclick="openOrderForm()" style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:0;cursor:pointer;background:#185FA5;padding:13px 16px">'
+    +'<div style="display:flex;align-items:center;gap:10px">'
+    +'<div style="background:rgba(255,255,255,0.22);border-radius:10px;padding:5px 11px;font-size:14px;font-weight:800;color:white">'+totalQty+' ta</div>'
+    +'<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.9)">'+fmt(totalPrice)+' so\'m</div>'
+    +'</div>'
+    +'<div style="background:white;color:#185FA5;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;white-space:nowrap">Buyurtma berish &#8594;</div>'
+    +'</div>';
+  bar.style.display='flex';
+}
+
+function openOrderForm(){
+  if(!D.cart||!D.cart.length){showToast('Savatcha bo\'sh!');return;}
+  const seenIds=new Set();
+  const uniqIg=D.ig.filter(function(ig){const k=Number(ig.id);if(isNaN(k)||seenIds.has(k))return false;seenIds.add(k);return true;});
+  D.saleIgId=D.user.igId?Number(D.user.igId):(uniqIg[0]?uniqIg[0].id:null);
+  if(!uniqIg.length){confirmIgSel();return;}
+  const totalQty=D.cart.reduce((a,it)=>a+it.qty,0);
+  const totalPrice=D.cart.reduce((a,it)=>a+(it.price*it.qty),0);
+  const igList=uniqIg.map(function(ig){return '<div onclick="selectSaleIg('+ig.id+')" id="sig_'+ig.id+'" style="padding:10px 14px;border-radius:10px;border:2px solid #eee;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:10px"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div><span style="font-size:14px;font-weight:600">'+ig.name+'</span></div>';}).join('');
+  document.getElementById('igSelBody').innerHTML='<div style="font-size:15px;font-weight:700;margin-bottom:4px">Buyurtma: '+totalQty+' ta mahsulot</div><div style="font-size:13px;color:#185FA5;margin-bottom:16px">Jami: '+fmt(totalPrice)+' so\'m</div><div style="font-size:13px;color:#666;margin-bottom:10px">Qaysi Instagram orqali sotuv?</div>'+igList;
+  updateIgSel();
+  document.getElementById('igSelW').classList.add('show');
+}
+
+function renderCartItems(){
+  const list=document.getElementById('cartItemsList');
+  const totalEl=document.getElementById('cartTotalAmt');
+  if(!list) return;
+  if(!D.cart||!D.cart.length){list.innerHTML='';if(totalEl)totalEl.textContent='0 so\'m';return;}
+  let total=0;
+  list.innerHTML=D.cart.map(function(item,i){
+    const p=gP(item.pid);
+    const name=p?p.name:'Mahsulot';
+    const lineTotal=item.price*item.qty;
+    total+=lineTotal;
+    const imgHtml=item.selectedImg
+      ?'<img src="'+item.selectedImg+'" style="width:48px;height:48px;object-fit:contain;border-radius:8px;background:#f8f8f6;flex-shrink:0">'
+      :'<div style="width:48px;height:48px;border-radius:8px;background:#f5f5f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#128230;</div>';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#f8f9fb;border-radius:12px;margin-bottom:8px">'
+      +imgHtml
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+'</div>'
+      +'<div style="font-size:12px;color:#185FA5;font-weight:600">'+fmt(item.price)+' so\'m &times; '+item.qty+' = '+fmt(lineTotal)+' so\'m</div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0">'
+      +'<button onclick="updateCartQty('+i+',-1)" style="width:28px;height:28px;border-radius:8px;border:1px solid #ddd;background:white;font-size:16px;cursor:pointer;font-family:inherit">&#8722;</button>'
+      +'<span style="font-size:14px;font-weight:700;min-width:18px;text-align:center">'+item.qty+'</span>'
+      +'<button onclick="updateCartQty('+i+',1)" style="width:28px;height:28px;border-radius:8px;border:1px solid #ddd;background:white;font-size:16px;cursor:pointer;font-family:inherit">+</button>'
+      +'<button onclick="removeFromCart('+i+')" style="width:28px;height:28px;border-radius:8px;border:none;background:#FEE2E2;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">&#10005;</button>'
+      +'</div></div>';
+  }).join('');
+  if(totalEl)totalEl.textContent=fmt(total)+' so\'m';
+}
+
+function updateCartQty(idx,delta){
+  if(!D.cart||!D.cart[idx]) return;
+  D.cart[idx].qty=Math.max(1,D.cart[idx].qty+delta);
+  renderCartItems();
+  renderCartBar();
+}
+
+function removeFromCart(idx){
+  if(!D.cart) return;
+  D.cart.splice(idx,1);
+  renderCartItems();
+  renderCartBar();
+  if(!D.cart.length){closeConf();renderSotuv();}
 }
 
 function fmtPhone(inp){
@@ -487,54 +600,58 @@ function fmtPhone(inp){
 window.confirmSell = async function(){
   if(_sellLock) return;
   _sellLock=true;
-  const p=gP(D.pPid); if(!p) return;
+  if(!D.cart||!D.cart.length){_sellLock=false;return;}
   const name=document.getElementById('custName').value.trim();
   const phone='+998'+document.getElementById('custPhone').value.trim();
   const address=document.getElementById('custAddress').value.trim();
-  const qty=parseInt(document.getElementById('custQty').value)||1;
   const note=document.getElementById('custNote').value.trim();
   const payType=document.getElementById('custPayType').value||'card';
-  const phoneClean=document.getElementById('custPhone').value.replace(/\D/g,'');if(!name||phoneClean.length!==9||!address){
+  const phoneClean=document.getElementById('custPhone').value.replace(/\D/g,'');
+  if(!name||phoneClean.length!==9||!address){
     document.getElementById('confErr').style.display='block';
     _sellLock=false;
     return;
   }
   document.getElementById('confErr').style.display='none';
-  const noteEl=document.getElementById('custNote');if(noteEl)noteEl.value='';
-  const qtyEl=document.getElementById('custQty');if(qtyEl)qtyEl.value='1';
-  const ptEl=document.getElementById('custPayType');if(ptEl)ptEl.value='card';
-  setPayType('card');
-  
   const now=new Date();
   const igId=D.saleIgId||D.user.igId||null;
-  const selectedImg=D.saleSelectedImg||(p.imgs&&p.imgs[0])||p.img||'';
   const orderId='ord_'+Date.now();
-  
-  // To'lov cheki Storage ga yuklash
   let receiptUrl='';
   if(D_receiptImg && window.FS){
     showToast('Chek yuklanmoqda...');
     receiptUrl=await window.FS.uploadImage(D_receiptImg,'receipts/'+orderId+'.jpg')||'';
   }
-  
+  const items=D.cart.map(function(it){return {pid:it.pid,qty:it.qty,price:it.price,selectedImg:it.selectedImg};});
+  const firstItem=items[0];
+  const total=items.reduce(function(a,it){return a+(it.price*it.qty);},0);
   const sale={
-    id:D.nSid++, sid:D.user.id, igId:igId, pid:p.id,
+    id:D.nSid++, sid:D.user.id, igId:igId,
+    pid:firstItem.pid,
+    items:items,
+    total:total,
     date:now.toISOString().slice(0,10), time:now.toTimeString().slice(0,5),
-    orderId, customer:{name,phone,address,note,payType,qty}, receiptUrl,
-    selectedImg:D.saleSelectedImg||'', status:'new'
+    orderId, customer:{name,phone,address,note,payType}, receiptUrl,
+    selectedImg:firstItem.selectedImg||'', status:'new'
   };
-  
-  // Qty > 1 bo'lsa qo'shimcha sale yozuvlari qo'shamiz
   D.sales.push(sale);
   if(window.FS) window.FS.addSale(sale);
   sendTelegramNotification(sale);
+  D.cart=[];
   closeConf();
-  showToast(p.name+' - sotildi!');
+  renderCartBar();
+  showToast('Buyurtma qabul qilindi! ('+items.length+' ta mahsulot)');
   renderSotuv();
   renderMyD();
   _sellLock=false;
 }
-function closeConf(){document.getElementById('confW').classList.remove('show');}
+function closeConf(){
+  document.getElementById('confW').classList.remove('show');
+  const prevEl=document.getElementById('receiptPreview');
+  const placEl=document.getElementById('receiptPlaceholder');
+  if(prevEl)prevEl.style.display='none';
+  if(placEl)placEl.style.display='block';
+  D_receiptImg=null;
+}
 
 // --- TARIX ---
 let TX_filter={mode:'today'};

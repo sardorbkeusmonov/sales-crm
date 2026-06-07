@@ -98,30 +98,40 @@ function renderDelivery(){
   if(!allOrders.length){el.innerHTML='<div style="text-align:center;padding:40px 20px;color:#999;font-size:14px">Hozircha buyurtma yo\'q</div>';return;}
 
   function orderCard(s){
+    const items=getSaleItems(s);
     const p=gP(s.pid),sel=gS(s.sid),ig=gI(s.igId),cust=s.customer||{};
-    const payIcon=cust.payType==='cash'?'💵':'💳';
+    const payIcon=cust.payType==='cash'?'&#128181;':'&#128179;';
+    const total=s.total||items.reduce(function(a,it){return a+(it.price||(gP(it.pid)?gP(it.pid).price:0))*it.qty;},0);
+    const itemsHtml=items.map(function(it){
+      const ip=gP(it.pid);
+      const si=it.selectedImg||(ip?ip.img:'');
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:0.5px solid #f5f5f3">'
+        +(si?'<img src="'+si+'" onclick="showFullReceipt(\''+si+'\')" style="width:40px;height:40px;border-radius:8px;object-fit:contain;background:#f8f8f6;flex-shrink:0;cursor:pointer">':'<div style="width:40px;height:40px;border-radius:8px;background:#f5f5f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#128230;</div>')
+        +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ip?ip.name:'-')+'</div>'
+        +'<div style="font-size:12px;color:#185FA5;font-weight:600">'+(it.price||(ip?ip.price:0)?(fmt(it.price||(ip?ip.price:0))+' so\'m'):'')+' &times; '+it.qty+' ta</div>'
+        +'</div></div>';
+    }).join('');
     return '<div style="background:white;border-radius:14px;border:0.5px solid #e5e7eb;margin-bottom:8px;overflow:hidden">'
-      +'<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:0.5px solid #f5f5f3">'
-      +(()=>{const si=s.selectedImg||p?.img||'';return si?'<img src="'+si+'" onclick="showFullReceipt(this.src)" style="width:40px;height:40px;border-radius:8px;object-fit:contain;background:#f8f8f6;flex-shrink:0;cursor:pointer">':'<div style="width:40px;height:40px;border-radius:8px;background:#f5f5f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">📦</div>';})()
-      +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(p?p.name:'-')+'</div>'
-      +'<div style="font-size:11px;color:#888">'+(ig?ig.name:'')+(sel?' · '+sel.name:'')+'</div></div>'
-      +'<div style="text-align:right;flex-shrink:0"><div style="font-size:12px;font-weight:700;color:#185FA5">'+(p?fmt(p.price)+' so\'m':'-')+'</div>'
-      +'<div style="font-size:11px;color:#888">'+s.date+' '+s.time+'</div></div></div>'
+      +'<div style="background:#f8f9fb;padding:6px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:0.5px solid #f0f0ec">'
+      +'<div style="font-size:11px;color:#888">'+(ig?ig.name:'')+(sel?' &middot; '+sel.name:'')+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#185FA5">'+fmt(total)+' so\'m</div>'
+      +'</div>'
+      +itemsHtml
       +'<div style="display:flex;gap:10px;padding:10px 12px;border-bottom:0.5px solid #f5f5f3">'
-      +(s.receiptUrl?'<div style="flex-shrink:0;cursor:pointer" onclick="showFullReceipt(this.querySelector(\'img\').src)">'
+      +(s.receiptUrl?'<div style="flex-shrink:0;cursor:pointer" onclick="showFullReceipt(\''+s.receiptUrl+'\')">'
         +'<img src="'+s.receiptUrl+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:0.5px solid #eee">'
         +'<div style="font-size:10px;color:#999;text-align:center;margin-top:2px">Chek</div></div>'
-        :'<div style="width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#f9f9f7;border-radius:8px;height:64px;border:1px dashed #e5e7eb"><span style="font-size:22px">🧾</span></div>')
+        :'<div style="width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#f9f9f7;border-radius:8px;height:64px;border:1px dashed #e5e7eb"><span style="font-size:22px">&#129534;</span></div>')
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;color:#1a1a1a;margin-bottom:2px">👤 '+(cust.name||'-')+'</div>'
-      +(cust.qty&&cust.qty>1?'<div style="font-size:13px;font-weight:700;color:#185FA5;margin-bottom:2px">📦 Soni: '+cust.qty+' ta</div>':'')
-      +'<div style="font-size:13px;color:#555;margin-bottom:1px">📞 '+(cust.phone||'-')+'</div>'
-      +'<div style="font-size:13px;color:#555;margin-bottom:1px">📍 '+(cust.address||'-')+'</div>'
-      +(cust.note?'<div style="font-size:13px;color:#888;font-style:italic">💬 '+cust.note+'</div>':'')
+      +'<div style="font-size:13px;color:#1a1a1a;margin-bottom:2px">&#128100; '+(cust.name||'-')+'</div>'
+      +'<div style="font-size:13px;color:#555;margin-bottom:1px">&#128222; '+(cust.phone||'-')+'</div>'
+      +'<div style="font-size:13px;color:#555;margin-bottom:1px">&#128205; '+(cust.address||'-')+'</div>'
+      +(cust.note?'<div style="font-size:13px;color:#888;font-style:italic">&#128172; '+cust.note+'</div>':'')
       +'<div style="font-size:13px;color:#888;margin-top:1px">'+payIcon+' '+(cust.payType==='cash'?'Naqd':'Karta')+'</div>'
+      +'<div style="font-size:11px;color:#aaa;margin-top:2px">'+s.date+' '+s.time+'</div>'
       +'</div></div>'
       +'<div style="padding:8px 12px;display:flex;gap:6px">'
-      +nextStatuses(s.status||'new').map(([k,v],i)=>'<button onclick="updateOrderStatus(this)" data-id="'+(s._id||String(s.id))+'" data-status="'+k+'" style="flex:1;padding:8px;border-radius:8px;border:none;background:'+(i===0?'#185FA5':'#f0f0ec')+';color:'+(i===0?'white':'#555')+';font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">'+v+' →</button>').join('')
+      +nextStatuses(s.status||'new').map(([k,v],i)=>'<button onclick="updateOrderStatus(this)" data-id="'+(s._id||String(s.id))+'" data-status="'+k+'" style="flex:1;padding:8px;border-radius:8px;border:none;background:'+(i===0?'#185FA5':'#f0f0ec')+';color:'+(i===0?'white':'#555')+';font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">'+v+' &#8594;</button>').join('')
       +'</div></div>';
   }
 

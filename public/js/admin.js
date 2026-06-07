@@ -132,10 +132,8 @@ function onRoleChange(){
       fg.style.display='';
       if(sfg) sfg.style.display='none';
       const sdf=document.getElementById('startDateFg');if(sdf)sdf.style.display='';
-      // Mobilografga login/parol berilmaydi
       const _lgFg=document.getElementById('loginFg');const _psFg=document.getElementById('passFg');
-      if(role==='mobilograf'){if(_lgFg)_lgFg.style.display='none';if(_psFg)_psFg.style.display='none';}
-      else{if(_lgFg)_lgFg.style.display='';if(_psFg)_psFg.style.display='';}
+      if(_lgFg)_lgFg.style.display='';if(_psFg)_psFg.style.display='';
     } else if(role==='sotuvchi'){
       lbl.textContent="1 sotuv uchun haq (so'm)";
       document.getElementById('sComm').placeholder="Masalan: 10000";
@@ -193,8 +191,6 @@ function openEditSeller(id){
   if(edD)edD.value=parseInt(_sd[2]);
   document.getElementById('sStartDate').value=sel.startDate||today();
   onRoleChange();
-  const isTarj=(sel.role==='targetolog');
-  document.getElementById('igField').style.display=isTarj?'none':'block';
   fillIg(sel.igId);
   document.getElementById('selErr').style.display='none';
   document.getElementById('selSh').classList.add('show');
@@ -202,10 +198,10 @@ function openEditSeller(id){
 
 window.saveSeller = function(){
   const name=document.getElementById('sNm').value.trim();
-  const login=document.getElementById('sRole').value==='mobilograf'?('mob_'+Date.now()):document.getElementById('sLg').value.trim();
-  const pass=document.getElementById('sRole').value==='mobilograf'?'':document.getElementById('sPw').value.trim();
   const role=document.getElementById('sRole').value;
-  const igId=role==='targetolog'?null:(parseInt(document.getElementById('sIg').value)||null);
+  const login=document.getElementById('sLg').value.trim();
+  const pass=document.getElementById('sPw').value.trim();
+  const igId=role==='targetolog'?null:(role==='sotuvchi'?(parseInt(document.getElementById('sIg').value)||null):null);
   const commVal=document.getElementById('sComm').value;
   const comm=role==='targetolog'?(parseInt(commVal)||0):(parseInt(commVal)||10000);
   const salary=(role==='sotuvchi'||role==='omborchi'||role==='yetkazuvchi')?(parseInt(document.getElementById('sSalary').value)||0):0;
@@ -384,7 +380,7 @@ window.saveProd = async function(){
       const prodId=D.ePid||('new_'+Date.now());
       const path='products/'+prodId+'_'+i+'.jpg';
       const url=await window.FS.uploadImage(imgData,path);
-      if(url) uploadedUrls.push(url);
+      uploadedUrls.push(url||imgData);
     } else {
       uploadedUrls.push(imgData);
     }
@@ -492,8 +488,26 @@ function renderTarixPage(page){
   const shown=s.slice(start,start+_PAGE_SIZE);
 
   const detailHtml=shown.map(x=>{
+    const items=getSaleItems(x);
+    const isMulti=items.length>1;
     const p=gP(x.pid);
-    return`<div class="lr"><div class="dot" style="background:${p?p.color:'#ccc'}"></div><div style="flex:1"><div style="font-size:13px;font-weight:600">${p?p.name:'-'}</div><div style="font-size:14px;color:#888">${x.date} - ${x.time}</div></div><span style="font-size:13px;font-weight:600">${fmt(p?p.price:0)} so'm</span></div>`;
+    const si=x.selectedImg||(items[0]&&items[0].selectedImg)||(p?p.img:'');
+    const total=x.total||items.reduce((a,it)=>a+(it.price||(gP(it.pid)?gP(it.pid).price:0))*it.qty,0);
+    if(!isMulti){
+      return`<div class="lr">`
+        +(si?`<img src="${si}" style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:#f8f8f6;flex-shrink:0">`:`<div class="dot" style="background:${p?p.color:'#ccc'}"></div>`)
+        +`<div style="flex:1"><div style="font-size:13px;font-weight:600">${p?p.name:'-'}</div><div style="font-size:12px;color:#888">${x.date} ${x.time||''}</div></div><span style="font-size:13px;font-weight:600">${fmt(total)} so'm</span></div>`;
+    }
+    const summary=items.map(it=>{const ip=gP(it.pid);return(ip?ip.name:'-')+(it.qty>1?' \xd7'+it.qty:'');}).join(' + ');
+    const previewImgs=items.filter(it=>it.selectedImg).slice(0,3);
+    return`<div style="padding:10px 14px;border-bottom:0.5px solid #f5f5f3;display:flex;align-items:center;gap:10px">`
+      +`<div style="display:flex;gap:3px;flex-shrink:0">`
+      +previewImgs.map(it=>`<img src="${it.selectedImg}" style="width:30px;height:30px;border-radius:6px;object-fit:contain;background:#f8f8f6">`).join('')
+      +(items.length>previewImgs.length?`<div style="width:30px;height:30px;border-radius:6px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#185FA5">+${items.length-previewImgs.length}</div>`:'')
+      +`</div>`
+      +`<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${summary}</div><div style="font-size:11px;color:#888">${x.date} ${x.time||''}</div></div>`
+      +`<span style="font-size:13px;font-weight:700;color:#185FA5;flex-shrink:0">${fmt(total)} so'm</span>`
+      +`</div>`;
   }).join('');
 
   let paginHtml='';
@@ -553,8 +567,27 @@ function renderSalesList(filtered, page){
 
   // Detail list
   const detailHtml=shown.map(s=>{
+    const items=getSaleItems(s);
+    const isMulti=items.length>1;
     const p=gP(s.pid);const sel=gS(s.sid);const ig=s.igId?gI(s.igId):(sel?gI(sel.igId):null);
-    return`<div class="lr"><div class="dot" style="background:${p?p.color:'#ccc'}"></div><div style="flex:1"><div style="font-size:14px">${p?p.name:'-'}</div><div style="font-size:13px;color:#888">${sel?sel.name:'<i style="color:#bbb">O\'chirilgan</i>'} ${ig?'- '+ig.name:''} • ${s.date} ${s.time}</div></div><span style="font-size:14px;font-weight:600">${fmt(p?p.price:0)} so'm</span></div>`;
+    const si=s.selectedImg||(items[0]&&items[0].selectedImg)||(p?p.img:'');
+    const total=s.total||items.reduce((a,it)=>a+(it.price||(gP(it.pid)?gP(it.pid).price:0))*it.qty,0);
+    const meta=`${sel?sel.name:'<i style="color:#bbb">O\'chirilgan</i>'} ${ig?'· '+ig.name:''} · ${s.date} ${s.time}`;
+    if(!isMulti){
+      return`<div class="lr">`
+        +(si?`<img src="${si}" style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:#f8f8f6;flex-shrink:0">`:`<div class="dot" style="background:${p?p.color:'#ccc'}"></div>`)
+        +`<div style="flex:1"><div style="font-size:14px">${p?p.name:'-'}</div><div style="font-size:13px;color:#888">${meta}</div></div><span style="font-size:14px;font-weight:600">${fmt(total)} so'm</span></div>`;
+    }
+    const summary=items.map(it=>{const ip=gP(it.pid);return(ip?ip.name:'-')+(it.qty>1?' \xd7'+it.qty:'');}).join(' + ');
+    const previewImgs=items.filter(it=>it.selectedImg).slice(0,2);
+    return`<div style="padding:10px 14px;border-bottom:0.5px solid #f5f5f3;display:flex;align-items:center;gap:10px">`
+      +`<div style="display:flex;gap:3px;flex-shrink:0">`
+      +previewImgs.map(it=>`<img src="${it.selectedImg}" style="width:32px;height:32px;border-radius:6px;object-fit:contain;background:#f8f8f6">`).join('')
+      +(items.length>previewImgs.length?`<div style="width:32px;height:32px;border-radius:6px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#185FA5">+${items.length-previewImgs.length}</div>`:'')
+      +`</div>`
+      +`<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${summary}</div><div style="font-size:12px;color:#888">${meta}</div></div>`
+      +`<span style="font-size:14px;font-weight:700;color:#185FA5;flex-shrink:0">${fmt(total)} so'm</span>`
+      +`</div>`;
   }).join('');
 
   // Pagination

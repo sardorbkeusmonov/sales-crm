@@ -70,7 +70,8 @@ const gP=id=>D.products.find(p=>p.id==id||Number(p.id)===Number(id));
 const gS=id=>D.sellers.find(s=>s.id===id);
 const gI=id=>D.ig.find(a=>a.id===id);
 const myS=()=>D.sales.filter(s=>s.sid===D.user.id);
-const rv=arr=>arr.reduce((a,s)=>{const p=gP(s.pid);const q=(s.customer&&s.customer.qty)||1;return a+(p?p.price*q:0);},0);
+const getSaleItems=s=>s.items&&s.items.length?s.items:[{pid:s.pid,qty:(s.customer&&s.customer.qty)||1,price:gP(s.pid)?gP(s.pid).price:0}];
+const rv=arr=>arr.reduce((a,s)=>{if(s.items&&s.items.length)return a+s.items.reduce((b,it)=>b+(it.price||0)*it.qty,0);const p=gP(s.pid);const q=(s.customer&&s.customer.qty)||1;return a+(p?p.price*q:0);},0);
 function buildHints(){
   document.getElementById('lhints').innerHTML='';
 }

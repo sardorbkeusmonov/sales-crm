@@ -331,13 +331,15 @@ async function saveTask() {
   showToast('Saqlandi ✓');
 }
 
-async function deleteTask(id) {
+function deleteTask(id) {
   const t = _findTask(id);
-  if (!t || !confirm("Bu topshiriqni o'chirasizmi?")) return;
-  D.tasks = (D.tasks||[]).filter(x => !(x._id && x._id===id) && String(x.id)!==String(id));
-  if (t._id) await window.FS.deleteTask(t._id);
-  renderTasks();
-  showToast("O'chirildi");
+  if (!t) return;
+  openDelConf("Topshiriqni o'chirish", "Bu topshiriqni o'chirasizmi?", async () => {
+    D.tasks = (D.tasks||[]).filter(x => !(x._id && x._id===id) && String(x.id)!==String(id));
+    if (t._id) await window.FS.deleteTask(t._id);
+    renderTasks();
+    showToast("O'chirildi");
+  });
 }
 
 async function markTaskDone(id) {
@@ -421,13 +423,15 @@ async function saveAnn() {
   showToast('Saqlandi ✓');
 }
 
-async function deleteAnn(id) {
+function deleteAnn(id) {
   const a = _findAnn(id);
-  if (!a || !confirm("Bu e'lonni o'chirasizmi?")) return;
-  D.announcements = (D.announcements||[]).filter(x => !(x._id && x._id===id) && String(x.id)!==String(id));
-  if (a._id) await window.FS.deleteAnnouncement(a._id);
-  renderTasks();
-  showToast("O'chirildi");
+  if (!a) return;
+  openDelConf("E'lonni o'chirish", "Bu e'lonni o'chirasizmi?", async () => {
+    D.announcements = (D.announcements||[]).filter(x => !(x._id && x._id===id) && String(x.id)!==String(id));
+    if (a._id) await window.FS.deleteAnnouncement(a._id);
+    renderTasks();
+    showToast("O'chirildi");
+  });
 }
 
 async function markAnnRead(id) {

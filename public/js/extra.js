@@ -757,16 +757,13 @@ function renderSofFoyda(){
   if(sfPL) sfPL.textContent=periodText;
 
   const sfAm=document.getElementById('sfAmount');
-  if(sfAm) sfAm.textContent=fmt(Math.abs(netProfit));
+  if(sfAm){sfAm.textContent=fmt(Math.abs(netProfit));sfAm.style.color=netProfit>=0?'#fff':'#F87171';}
 
   const sfCur=document.getElementById('sfCurrency');
-  if(sfCur) sfCur.textContent="so'm";
+  if(sfCur){sfCur.textContent=netProfit>=0?"so'm":"so'm ziyonda";sfCur.style.color=netProfit>=0?'#94A3B8':'#F87171';}
 
   const sfSub=document.getElementById('sfSubLabel');
-  if(sfSub){
-    sfSub.textContent=margin+'% foydalilik';
-    sfSub.style.color=netProfit>=0?'#4ADE80':'#F87171';
-  }
+  if(sfSub){sfSub.textContent=netProfit>=0?margin+'% foydalilik':'Biznes ziyonda';sfSub.style.color=netProfit>=0?'#4ADE80':'#F87171';}
 
   const sfRvEl=document.getElementById('sfRev');
   if(sfRvEl) sfRvEl.textContent=fmt(revenue);
