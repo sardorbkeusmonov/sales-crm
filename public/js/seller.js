@@ -527,7 +527,7 @@ function renderCartBar(){
     +'<div style="background:rgba(255,255,255,0.22);border-radius:10px;padding:5px 11px;font-size:14px;font-weight:800;color:white">'+totalQty+' ta</div>'
     +'<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.9)">'+fmt(totalPrice)+' so\'m</div>'
     +'</div>'
-    +'<div style="background:white;color:#185FA5;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;white-space:nowrap">Buyurtma berish &#8594;</div>'
+    +'<div style="background:white;color:#185FA5;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;white-space:nowrap">Sotuv qilish &#8594;</div>'
     +'</div>';
   bar.style.display='flex';
 }
