@@ -370,7 +370,18 @@ function renderSotuv(){
     for(let i=1;i<=_tp;i++){const on=i===_spg;_bt+='<button onclick="window._sotuvPage='+i+';renderSotuv()" style="min-width:34px;height:34px;border-radius:8px;border:'+(on?'2px solid #185FA5':'1px solid #e5e7eb')+';background:'+(on?'#EFF6FF':'white')+';color:'+(on?'#185FA5':'#555')+';font-size:14px;cursor:pointer;font-family:inherit">'+i+'</button>';}
     _spn='<div style="padding:12px 0;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap"><button onclick="if(window._sotuvPage>1){window._sotuvPage--;renderSotuv()}" '+((_spg===1)?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;opacity:'+((_spg===1)?'.4':'1')+'">&#8249;</button>'+_bt+'<button onclick="if(window._sotuvPage<'+_tp+'){window._sotuvPage++;renderSotuv()}" '+((_spg===_tp)?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;opacity:'+((_spg===_tp)?'.4':'1')+'">&#8250;</button></div>';
   }
-  document.getElementById('prodList').innerHTML=(_st?_sh:'')+myProds.map(p=>{
+  const _cqB=(D.cart||[]).reduce((a,it)=>a+it.qty,0);
+  const _ctB=(D.cart||[]).reduce((a,it)=>a+(it.price*it.qty),0);
+  const _variantB=_cqB>0?'<div style="position:sticky;top:0;z-index:10;background:white;padding:8px 0 10px;margin-bottom:4px">'
+    +'<div style="background:#185FA5;border-radius:12px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
+    +'<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
+    +'<span style="color:white;font-size:22px">&#128722;</span>'
+    +'<div><div style="color:white;font-size:13px;font-weight:700;white-space:nowrap">'+_cqB+' ta mahsulot</div>'
+    +'<div style="color:rgba(255,255,255,.85);font-size:12px;font-weight:600">'+fmt(_ctB)+' so\'m</div></div>'
+    +'</div>'
+    +'<button onclick="openOrderForm()" style="background:white;color:#185FA5;border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Sotuv qilish &#8594;</button>'
+    +'</div></div>':'';
+  document.getElementById('prodList').innerHTML=_variantB+(_st?_sh:'')+myProds.map(p=>{
     if(!D.cart) D.cart=[];
     const cnt=D.sales.filter(s=>String(s.sid)===String(D.user.id)&&String(s.pid)===String(p.id)).length;
     const cartQty=(D.cart||[]).filter(c=>String(c.pid)===String(p.id)).reduce((a,c)=>a+c.qty,0);
