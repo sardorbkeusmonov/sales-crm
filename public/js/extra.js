@@ -372,18 +372,27 @@ const TG_CHAT = '-5256487011';
 
 async function sendTelegramNotification(sale){
   try{
-    const p=gP(sale.pid);
     const sel=gS(sale.sid);
     const ig=gI(sale.igId);
     const cust=sale.customer||{};
     const payIcon=cust.payType==='cash'?'💵 Naqd':'💳 Karta';
+    const items=getSaleItems(sale);
+    const isMulti=items.length>1;
+    const total=sale.total||items.reduce((a,it)=>a+(it.price||(gP(it.pid)?gP(it.pid).price:0))*it.qty,0);
+
+    const itemLines=items.map((it,i)=>{
+      const ip=gP(it.pid);
+      return '   '+(i+1)+'. '+(ip?ip.name:'-')+(it.qty>1?' × '+it.qty:'')+' — '+(it.price?fmt(it.price*it.qty)+' so\'m':'');
+    }).join('\n');
 
     const text=
       '🛒 Yangi buyurtma!\n\n'
       +'👤 Sotuvchi: '+(sel?sel.name:'-')+'\n'
-      +'📦 Mahsulot: '+(p?p.name:'-')+(cust.qty&&cust.qty>1?' ('+cust.qty+' ta)':'')+'\n'
-      +'💰 Narx: '+(p?fmt(p.price)+' so\'m':'-')+'\n'
-      +'📱 Instagram: '+(ig?ig.name:'-')+'\n\n'
+      +'📱 Instagram: '+(ig?ig.name:'-')+'\n'
+      +(isMulti
+        ?'📦 Mahsulotlar ('+items.length+' ta):\n'+itemLines+'\n💰 Jami: '+fmt(total)+' so\'m'
+        :'📦 Mahsulot: '+itemLines.trim()+'\n💰 Narx: '+fmt(total)+' so\'m')
+      +'\n\n'
       +'👤 Mijoz: '+(cust.name||'-')+'\n'
       +'📞 Telefon: '+(cust.phone||'-')+'\n'
       +'📍 Manzil: '+(cust.address||'-')+'\n'
@@ -391,8 +400,10 @@ async function sendTelegramNotification(sale){
       +(cust.note?'💬 Izoh: '+cust.note+'\n':'')
       +'🕐 Vaqt: '+sale.time+' | '+sale.date;
 
-    const selImg=sale.selectedImg||p.img||'';
-    const hasProdImg=selImg&&selImg.startsWith('http');
+    const firstItem=items[0];
+    const firstImg=firstItem&&firstItem.selectedImg||(gP(sale.pid)?gP(sale.pid).img:'');
+    const selImg=firstImg&&firstImg.startsWith('http')?firstImg:'';
+    const hasProdImg=!!selImg;
     const hasReceipt=!!sale.receiptUrl;
 
     await fetch('https://api.telegram.org/bot'+TG_TOKEN+'/sendMessage',{
