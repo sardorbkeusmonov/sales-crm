@@ -396,7 +396,19 @@ function renderSotuv(){
     <button style="width:100%;${cartQty?'background:#EFF6FF;color:#185FA5;border:2px solid #185FA5':'background:#185FA5;color:#fff;border:none'};border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px" onclick="addToCart(${p.id})">${cartQty?'&#128722; Savatchada ('+cartQty+' ta) +':'&#128722; Savatchaga +'}</button>
   </div>
 </div>`;
-  }).join('')+_spn;
+  }).join('')+_spn+(()=>{
+    if(!D.cart) D.cart=[];
+    const _cq=D.cart.reduce((a,it)=>a+it.qty,0);
+    const _ct=D.cart.reduce((a,it)=>a+(it.price*it.qty),0);
+    if(!_cq) return '';
+    return '<div style="margin:16px 0 8px;background:#EFF6FF;border-radius:14px;padding:16px;border:2px solid #185FA5">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+      +'<div style="font-size:14px;font-weight:700;color:#185FA5">&#128722; Savatcha: '+_cq+' ta mahsulot</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#185FA5">'+fmt(_ct)+' so\'m</div>'
+      +'</div>'
+      +'<button onclick="openOrderForm()" style="width:100%;background:#185FA5;color:white;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Sotuv qilish &#8594;</button>'
+      +'</div>';
+  })();
   renderCartBar();
 }
 function askSell(id){addToCart(id);}
@@ -515,21 +527,19 @@ let _sellLock=false;
 
 function renderCartBar(){
   if(!D.cart) D.cart=[];
-  let bar=document.getElementById('cartBar');
-  if(!D.cart.length){if(bar)bar.style.display='none';return;}
+  // Eski floating bar ni o'chirish
+  const oldBar=document.getElementById('cartBar');
+  if(oldBar) oldBar.remove();
+  // Tab badge yangilash
+  const badge=document.getElementById('cartBadge');
+  if(!badge) return;
   const totalQty=D.cart.reduce((a,it)=>a+it.qty,0);
-  const totalPrice=D.cart.reduce((a,it)=>a+(it.price*it.qty),0);
-  const isDesktop=window.innerWidth>=768;
-  if(!bar){bar=document.createElement('div');bar.id='cartBar';document.body.appendChild(bar);}
-  bar.style.cssText='position:fixed;'+(isDesktop?'bottom:20px':'bottom:70px')+';left:50%;transform:translateX(-50%);z-index:9999;border-radius:16px;display:flex;align-items:center;padding:0;box-shadow:0 4px 24px rgba(24,95,165,0.35);min-width:300px;max-width:calc(100vw - 32px);overflow:hidden';
-  bar.innerHTML='<div onclick="openOrderForm()" style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:0;cursor:pointer;background:#185FA5;padding:13px 16px">'
-    +'<div style="display:flex;align-items:center;gap:10px">'
-    +'<div style="background:rgba(255,255,255,0.22);border-radius:10px;padding:5px 11px;font-size:14px;font-weight:800;color:white">'+totalQty+' ta</div>'
-    +'<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.9)">'+fmt(totalPrice)+' so\'m</div>'
-    +'</div>'
-    +'<div style="background:white;color:#185FA5;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;white-space:nowrap">Sotuv qilish &#8594;</div>'
-    +'</div>';
-  bar.style.display='flex';
+  if(totalQty>0){
+    badge.textContent=totalQty>9?'9+':String(totalQty);
+    badge.style.display='inline-block';
+  } else {
+    badge.style.display='none';
+  }
 }
 
 function openOrderForm(){

@@ -24,7 +24,7 @@ function buildSellerTabs(){
   };
   const taskIc2=ic2('<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6"/><path d="M9 16h4"/>');
   document.getElementById('tabbar').innerHTML=`
-    <button class="tab on" onclick="goTab('tMyD','Sotuv',this)">${I2.dash}<span style="font-size:13px">Sotuv</span></button>
+    <button id="sotuvTab" class="tab on" style="position:relative" onclick="goTab('tMyD','Sotuv',this)">${I2.dash}<span style="font-size:13px">Sotuv</span><span id="cartBadge" style="display:none;position:absolute;top:4px;right:4px;background:#dc2626;color:white;border-radius:50%;min-width:17px;height:17px;font-size:10px;font-weight:800;line-height:17px;text-align:center;padding:0 3px;pointer-events:none">0</span></button>
     <button class="tab" onclick="goTab('tMyJ','Jamoa',this)">${I2.team}<span style="font-size:13px">Jamoa</span></button>
     <button class="tab" onclick="goTab('tTarix','Daromadim',this)">${I2.income}<span style="font-size:13px">Daromadim</span></button>
     <button class="tab" onclick="goTab('tMyOrders','Buyurtmalar',this)">${ic2('<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>')}<span style="font-size:13px">Buyurtmalar</span></button>
