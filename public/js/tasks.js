@@ -1,7 +1,80 @@
 // ===== TOPSHIRIQLAR VA E'LONLAR =====
 let _taskEdit = null;
 let _annEdit = null;
-let _taskFilter = 'all';
+let _taskFilter = 'yangi';
+let _tskCal = {year:0,month:0,selected:''};
+
+function _renderPriorityPills(val){
+  const v=val||'oddiy';
+  const hid=document.getElementById('tskPriorityInp');
+  if(hid) hid.value=v;
+  const el=document.getElementById('tskPriorityPills');
+  if(!el) return;
+  const opts=[{v:'oddiy',l:'⚪ Oddiy'},{v:'muhim',l:'🟡 Muhim'},{v:'shoshilinch',l:'🔴 Shoshilinch'}];
+  el.innerHTML=opts.map(o=>{
+    const on=v===o.v;
+    const bc=o.v==='shoshilinch'?'#dc2626':o.v==='muhim'?'#d97706':'var(--c4)';
+    const bg=o.v==='shoshilinch'?'#FEF2F2':o.v==='muhim'?'#FFFBEB':'var(--bg1)';
+    const bdc=on?(o.v==='shoshilinch'?'#dc2626':o.v==='muhim'?'#d97706':'var(--p)'):'var(--bd)';
+    return`<button type="button" onclick="selectTskPriority('${o.v}')" style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid ${bdc};background:${on?bg:'var(--bg1)'};color:${on?bc:'var(--c4)'};font-size:12px;font-weight:${on?'700':'400'};cursor:pointer;font-family:inherit;text-align:center">${o.l}</button>`;
+  }).join('');
+}
+function selectTskPriority(v){_renderPriorityPills(v);}
+
+function _renderStatusPills(val){
+  const v=val||'yangi';
+  const hid=document.getElementById('tskStatusInp');
+  if(hid) hid.value=v;
+  const el=document.getElementById('tskStatusPills');
+  if(!el) return;
+  const opts=[{v:'yangi',l:'Yangi',bc:'#185FA5',bg:'#EFF6FF'},{v:'jarayonda',l:'Jarayonda',bc:'#7c3aed',bg:'#EDE9FE'},{v:'bajarildi',l:'Bajarildi',bc:'#16a34a',bg:'#DCFCE7'}];
+  el.innerHTML=opts.map(o=>{
+    const on=v===o.v;
+    return`<button type="button" onclick="selectTskStatus('${o.v}')" style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid ${on?o.bc:'var(--bd)'};background:${on?o.bg:'var(--bg1)'};color:${on?o.bc:'var(--c4)'};font-size:12px;font-weight:${on?'700':'400'};cursor:pointer;font-family:inherit;text-align:center">${o.l}</button>`;
+  }).join('');
+}
+function selectTskStatus(v){_renderStatusPills(v);}
+
+function _setTskDueDisplay(ds){
+  const hid=document.getElementById('tskDueInp');
+  if(hid) hid.value=ds;
+  const btn=document.getElementById('tskDueBtnText');
+  if(btn&&ds){const p=ds.split('-');btn.textContent=p[2]+'.'+p[1]+'.'+p[0];}
+}
+function openTskCal(){
+  const cur=document.getElementById('tskDueInp').value||today();
+  const d=new Date(cur);
+  _tskCal={year:d.getFullYear(),month:d.getMonth(),selected:cur};
+  renderTskCal();
+  document.getElementById('tskCalW').style.display='flex';
+}
+function closeTskCal(){document.getElementById('tskCalW').style.display='none';}
+function tskCalPrev(){_tskCal.month--;if(_tskCal.month<0){_tskCal.month=11;_tskCal.year--;}renderTskCal();}
+function tskCalNext(){_tskCal.month++;if(_tskCal.month>11){_tskCal.month=0;_tskCal.year++;}renderTskCal();}
+function renderTskCal(){
+  document.getElementById('tskCalLabel').textContent=MONTHS[_tskCal.month]+' '+_tskCal.year;
+  const first=new Date(_tskCal.year,_tskCal.month,1).getDay();
+  const days=new Date(_tskCal.year,_tskCal.month+1,0).getDate();
+  const td=today();
+  let cells='';
+  for(let i=0;i<first;i++) cells+='<div></div>';
+  for(let d=1;d<=days;d++){
+    const ds=_tskCal.year+'-'+String(_tskCal.month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const sel=_tskCal.selected===ds;
+    const isTd=ds===td;
+    const bg=sel?'var(--p)':'transparent';
+    const col=sel?'#fff':isTd?'var(--p)':'var(--c1)';
+    const fw=sel||isTd?'700':'400';
+    const extra=isTd&&!sel?';outline:2px solid var(--p);outline-offset:-2px':'';
+    cells+=`<div onclick="tskCalClick('${ds}')" style="cursor:pointer;padding:6px 2px;border-radius:50%;background:${bg};color:${col};font-weight:${fw};font-size:13px${extra}">${d}</div>`;
+  }
+  document.getElementById('tskCalGrid').innerHTML=cells;
+}
+function tskCalClick(ds){
+  _tskCal.selected=ds;
+  _setTskDueDisplay(ds);
+  closeTskCal();
+}
 let _tskView = 't';
 
 function renderTasks() {
@@ -78,27 +151,27 @@ function _renderTasksPanel(el) {
     return (a.dueDate||'') > (b.dueDate||'') ? 1 : -1;
   });
 
-  const filterHtml = ['all','yangi','jarayonda','bajarildi'].map(f => {
+  const filterHtml = ['yangi','jarayonda','bajarildi'].map(f => {
     const active = _taskFilter === f;
-    const label = f==='all'?'Hammasi':f==='yangi'?'Yangi':f==='jarayonda'?'Jarayonda':'Bajarildi';
-    return `<button onclick="setTskFilter('${f}')" style="flex-shrink:0;padding:6px 14px;border-radius:10px;border:2px solid ${active?'#185FA5':'#e5e7eb'};background:${active?'#EFF6FF':'white'};color:${active?'#185FA5':'#888'};font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${label}</button>`;
+    const label = f==='yangi'?'Yangi':f==='jarayonda'?'Jarayonda':'Bajarildi';
+    return `<button onclick="setTskFilter('${f}')" style="flex:1;padding:8px 6px;border-radius:10px;border:2px solid ${active?'var(--p)':'var(--bd)'};background:${active?'var(--pbg)':'var(--bg1)'};color:${active?'var(--p)':'var(--c4)'};font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center">${label}</button>`;
   }).join('');
 
   const addBtn = isAdmin
     ? `<button onclick="openAddTask()" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px">+ Topshiriq qo\'shish</button>`
     : '';
 
-  const filterBar = `<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px">${filterHtml}</div>`;
+  const filterBar = `<div style="display:flex;gap:6px;margin-bottom:12px">${filterHtml}</div>`;
 
   if (!tasks.length) {
-    el.innerHTML = addBtn + filterBar + `<div style="text-align:center;padding:40px 16px;color:#aaa"><div style="display:flex;justify-content:center;margin-bottom:10px"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></div><div style="font-size:14px">Topshiriq yo\'q</div></div>`;
+    el.innerHTML = addBtn + filterBar + `<div style="text-align:center;padding:40px 16px;color:var(--c4)"><div style="display:flex;justify-content:center;margin-bottom:10px"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></div><div style="font-size:14px">Topshiriq yo\'q</div></div>`;
     return;
   }
 
   const cards = tasks.map(t => {
     const tid = t._id || String(t.id);
     const pc = t.priority==='shoshilinch'?'#dc2626':t.priority==='muhim'?'#d97706':'#6b7280';
-    const pbg = t.priority==='shoshilinch'?'#FEF2F2':t.priority==='muhim'?'#FFFBEB':'#F9FAFB';
+    const pbg = t.priority==='shoshilinch'?'#FEF2F2':t.priority==='muhim'?'#FFFBEB':'var(--bg2)';
     const pLabel = t.priority==='shoshilinch'?'Shoshilinch':t.priority==='muhim'?'Muhim':'Oddiy';
     const sc = t.status==='bajarildi'?'#16a34a':t.status==='jarayonda'?'#7c3aed':'#185FA5';
     const sbg = t.status==='bajarildi'?'#DCFCE7':t.status==='jarayonda'?'#EDE9FE':'#EFF6FF';
@@ -112,17 +185,19 @@ function _renderTasksPanel(el) {
     let progressHtml = '';
     if (isAdmin) {
       const comp = t.completedBy||{};
-      const done = Object.values(comp).filter(v=>v===true).length;
-      const started = Object.values(comp).filter(v=>v==='started').length;
-      const total = to.includes('all')
-        ? (D.sellers||[]).filter(s=>s.role!=='omborchi'&&s.role!=='yetkazuvchi'&&s.name).length
-        : to.length;
-      if (total > 0) {
-        const parts = [];
-        if (done) parts.push(`<span style="color:#16a34a">&#10003; ${done} bajardi</span>`);
-        if (started) parts.push(`<span style="color:#7c3aed">&#8635; ${started} jarayonda</span>`);
-        parts.push(`<span style="color:#aaa">${total} kishi</span>`);
-        progressHtml = `<span style="font-size:12px">${parts.join(' · ')}</span>`;
+      const sellerList = to.includes('all')
+        ? (D.sellers||[]).filter(s=>s.role!=='omborchi'&&s.role!=='yetkazuvchi'&&s.name)
+        : to.map(id=>(D.sellers||[]).find(s=>String(s.id)===String(id))).filter(Boolean);
+      if (sellerList.length > 0) {
+        const doneNames = sellerList.filter(s=>comp[String(s.id)]===true).map(s=>s.name);
+        const startedNames = sellerList.filter(s=>comp[String(s.id)]==='started').map(s=>s.name);
+        const notNames = sellerList.filter(s=>!comp[String(s.id)]).map(s=>s.name);
+        const pill=(n,bg,col)=>`<span style="display:inline-block;background:${bg};color:${col};padding:2px 7px;border-radius:12px;font-size:11px;font-weight:600;margin:1px 2px">${n}</span>`;
+        const rows=[];
+        if(doneNames.length) rows.push(`<div style="margin-top:4px"><span style="font-size:11px;color:#16a34a;font-weight:700">&#10003; Bajardi:</span> ${doneNames.map(n=>pill(n,'#DCFCE7','#16a34a')).join('')}</div>`);
+        if(startedNames.length) rows.push(`<div style="margin-top:3px"><span style="font-size:11px;color:#7c3aed;font-weight:700">&#8635; Jarayonda:</span> ${startedNames.map(n=>pill(n,'#EDE9FE','#7c3aed')).join('')}</div>`);
+        if(notNames.length) rows.push(`<div style="margin-top:3px"><span style="font-size:11px;color:#aaa;font-weight:700">&#8722; Boshlamagan:</span> ${notNames.map(n=>pill(n,'var(--bg2)','#888')).join('')}</div>`);
+        progressHtml = `<div style="width:100%">${rows.join('')}</div>`;
       }
     }
 
@@ -148,7 +223,7 @@ function _renderTasksPanel(el) {
       </div>` : '';
 
     return `
-      <div style="background:white;border-radius:14px;padding:14px;border:0.5px solid #e5e7eb;margin-bottom:10px;border-left:4px solid ${pc}">
+      <div style="background:var(--bg1);border-radius:14px;padding:14px;border:0.5px solid var(--bd);margin-bottom:10px;border-left:4px solid ${pc}">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span style="background:${pbg};color:${pc};padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">${pLabel}</span>
@@ -156,9 +231,9 @@ function _renderTasksPanel(el) {
           </div>
           ${adminBtns}
         </div>
-        <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:${t.desc?'4px':'6px'}">${t.title}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--c1);margin-bottom:${t.desc?'4px':'6px'}">${t.title}</div>
         ${t.desc ? `<div style="font-size:13px;color:#666;margin-bottom:6px;line-height:1.5">${t.desc}</div>` : ''}
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:#888">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--c4)">
           ${t.dueDate ? `<span>&#128197; ${t.dueDate}</span>` : ''}
           <span>&#128101; ${assignLabel}</span>
           ${progressHtml}
@@ -185,7 +260,7 @@ function _renderAnnsPanel(el) {
     : '';
 
   if (!anns.length) {
-    el.innerHTML = addBtn + `<div style="text-align:center;padding:40px 16px;color:#aaa"><div style="display:flex;justify-content:center;margin-bottom:10px"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div style="font-size:14px">E\'lon yo\'q</div></div>`;
+    el.innerHTML = addBtn + `<div style="text-align:center;padding:40px 16px;color:var(--c4)"><div style="display:flex;justify-content:center;margin-bottom:10px"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div style="font-size:14px">E\'lon yo\'q</div></div>`;
     return;
   }
 
@@ -218,7 +293,7 @@ function _renderAnnsPanel(el) {
       : '';
 
     return `
-      <div style="background:${unread?'#FFFBEB':'white'};border-radius:14px;padding:14px;border:0.5px solid ${unread?'#FDE68A':'#e5e7eb'};margin-bottom:10px">
+      <div style="background:${unread?'#FFFBEB':'var(--bg1)'};border-radius:14px;padding:14px;border:0.5px solid ${unread?'#FDE68A':'var(--bd)'};margin-bottom:10px">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             ${a.pinned ? `<span style="background:#EFF6FF;color:#185FA5;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700">&#128204; Pin</span>` : ''}
@@ -226,10 +301,10 @@ function _renderAnnsPanel(el) {
           </div>
           ${adminBtns}
         </div>
-        <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:${a.body?'6px':'4px'}">${a.title}</div>
-        ${a.body ? `<div style="font-size:13px;color:#555;line-height:1.5;margin-bottom:6px">${a.body}</div>` : ''}
+        <div style="font-size:15px;font-weight:700;color:var(--c1);margin-bottom:${a.body?'6px':'4px'}">${a.title}</div>
+        ${a.body ? `<div style="font-size:13px;color:var(--c2);line-height:1.5;margin-bottom:6px">${a.body}</div>` : ''}
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <span style="font-size:12px;color:#aaa">${a.createdAt||''}</span>
+          <span style="font-size:12px;color:var(--c4)">${a.createdAt||''}</span>
           ${readCount}
         </div>
         ${workerBtn}
@@ -249,9 +324,9 @@ function openAddTask() {
   document.getElementById('taskModalTitle').textContent = "Topshiriq qo'shish";
   document.getElementById('tskTitleInp').value = '';
   document.getElementById('tskDescInp').value = '';
-  document.getElementById('tskPriorityInp').value = 'oddiy';
-  document.getElementById('tskDueInp').value = today();
-  document.getElementById('tskStatusInp').value = 'yangi';
+  _renderPriorityPills('oddiy');
+  _setTskDueDisplay(today());
+  _renderStatusPills('yangi');
   _renderTskAssignees([]);
   document.getElementById('taskModalW').classList.add('show');
 }
@@ -263,9 +338,9 @@ function openEditTask(id) {
   document.getElementById('taskModalTitle').textContent = 'Topshiriqni tahrirlash';
   document.getElementById('tskTitleInp').value = t.title||'';
   document.getElementById('tskDescInp').value = t.desc||'';
-  document.getElementById('tskPriorityInp').value = t.priority||'oddiy';
-  document.getElementById('tskDueInp').value = t.dueDate||today();
-  document.getElementById('tskStatusInp').value = t.status||'yangi';
+  _renderPriorityPills(t.priority||'oddiy');
+  _setTskDueDisplay(t.dueDate||today());
+  _renderStatusPills(t.status||'yangi');
   _renderTskAssignees(t.assignedTo||[]);
   document.getElementById('taskModalW').classList.add('show');
 }
@@ -276,7 +351,7 @@ function _renderTskAssignees(selected) {
   const isAll = selected.includes('all');
   const sellers = (D.sellers||[]).filter(s => s.name && s.login);
   el.innerHTML = `
-    <label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0ec;cursor:pointer;font-size:14px;font-weight:600">
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bg5);cursor:pointer;font-size:14px;font-weight:600">
       <input type="checkbox" id="tskAll" onchange="_onTskAllChange(this)" ${isAll?'checked':''}>
       Barcha xodimlar
     </label>
@@ -284,7 +359,7 @@ function _renderTskAssignees(selected) {
       ${sellers.map(s => `
         <label style="display:flex;align-items:center;gap:8px;padding:7px 0;cursor:pointer;font-size:14px;border-bottom:1px solid #f8f8f6">
           <input type="checkbox" class="tsk-sc" value="${s.id}" ${isAll||selected.map(String).includes(String(s.id))?'checked':''}>
-          ${s.name} <span style="font-size:11px;color:#aaa;margin-left:4px">${s.role}</span>
+          ${s.name} <span style="font-size:11px;color:var(--c4);margin-left:4px">${s.role}</span>
         </label>`).join('')}
     </div>`;
 }
