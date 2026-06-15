@@ -1,0 +1,909 @@
+﻿<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Sales CRM</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+
+<div id="pgL" class="scr show">
+  <div class="login-wrap">
+    <div style="width:100%;max-width:320px">
+      <div style="text-align:center;margin-bottom:28px">
+        <div style="font-size:24px;font-weight:700;color:var(--c1)">Sales CRM</div>
+        <div style="font-size:13px;color:var(--c5);margin-top:6px">Instagram sotuv tizimi</div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div class="fg"><label class="fl">Login</label><input class="inp" type="text" id="li" placeholder="loginni kiriting"></div>
+        <div class="fg">
+          <label class="fl">Parol</label>
+          <div style="position:relative">
+            <input class="inp" type="password" id="lp" placeholder="parolni kiriting" style="padding-right:44px">
+            <button type="button" onclick="togglePass('lp',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--c5);line-height:1">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="lerr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none">Login yoki parol noto'g'ri</div>
+        <button class="btn btnp" style="width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:600" onclick="doLogin()">Kirish</button>
+      </div>
+      <div id="lhints" style="margin-top:14px;font-size:14px;color:var(--c5);text-align:center;line-height:2.2"></div>
+    </div>
+  </div>
+</div>
+
+<div id="pgM" class="scr">
+
+<!-- DESKTOP SIDEBAR -->
+<div id="mainLayout">
+<div id="sidebar">
+  <div class="s-logo">
+    <div class="s-logo-t" id="sideTitle">Dashboard</div>
+    <div class="s-logo-s" id="sideSub"></div>
+  </div>
+  <div class="s-tabs" id="sidebarTabs"></div>
+  <button id="dmToggle" onclick="toggleDarkMode()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <span>Dark mode</span>
+  </button>
+  <div class="s-logout">
+    <button class="btn" style="width:100%;padding:10px;font-size:14px;color:var(--rd);border-color:var(--bd3)" onclick="doLogout()">Chiqish</button>
+  </div>
+</div>
+
+<!-- CONTENT AREA -->
+<div id="contentArea">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button id="hamburgerBtn" onclick="openMobileSidebar()" style="display:none;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:4px;color:var(--c1)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div><div class="topbar-t" id="ttitle" style="font-size:16px;font-weight:600;color:var(--c1)">Dashboard</div><div class="topbar-s" id="tsub" style="font-size:14px;font-weight:500;color:var(--c2);margin-top:2px"></div></div>
+    </div>
+  </div>
+
+  <!-- ADMIN: UMUMIY -->
+  <div id="tDash" class="sc" style="display:none">
+    <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;padding-top:8px">
+      <button class="dfilter on" id="filterToday" onclick="setFilter('today',this)">Bugun</button>
+      <button class="dfilter" id="filterAll" onclick="setFilter('all',this)">Jami</button>
+      <button class="dfilter" id="rangeBtn" onclick="openRangePicker()">&#128197; Sana tanlash</button>
+    </div>
+    <div id="periodLabel" style="font-size:15px;color:#185FA5;font-weight:600;margin-bottom:10px;padding:0 2px"></div>
+    <div class="sg" id="dStats"></div>
+    <div class="card"><div class="ch" id="barTitle">Kunlik sotuvlar (7 kun)</div><div style="padding:0 14px 14px"><div class="bw" id="dBars"></div></div></div>
+    <div class="card"><div class="ch">Instagram profil &#8212; kunlik sotuvlar</div><div id="igDay"></div></div>
+    <div class="card"><div class="ch">Eng ko'p sotilganlar</div><div id="topP"></div></div>
+    <div class="card"><div class="ch" id="salesListTitle">Bugungi sotuvlar</div><div id="todayAll"></div></div>
+  </div>
+
+  <!-- ADMIN: JAMOA -->
+  <div id="tJamoa" class="sc" style="display:none">
+    <div class="seg" id="jSeg" style="margin-top:8px"><button class="sb on" onclick="jView('s',this)">Sotuvchilar</button><button class="sb" onclick="jView('i',this)">Instagram</button></div>
+    <div id="jS"></div><div id="jI" style="display:none"></div>
+  </div>
+
+  <!-- ADMIN: MAHSULOTLAR -->
+  <div id="tProd" class="sc" style="display:none">
+    <button class="btn btnp" style="width:100%;padding:13px;border-radius:10px;margin-bottom:14px;margin-top:8px;font-size:14px;font-weight:600" onclick="openAddProd()">+ Mahsulot qo'shish</button>
+    <div style="padding:0 0 10px;position:sticky;top:0;background:var(--bg);z-index:5"><div style="position:relative"><input class="inp" id="prodAdmSearch" placeholder="🔍 Mahsulot qidirish..." oninput="clearTimeout(window._st2);window._st2=setTimeout(()=>{window._prodAdmPage=1;renderProdAdm()},300);document.getElementById('admClear').style.display=this.value?'flex':'none'" style="background:var(--bg1);border-radius:12px;padding-right:40px"><button id="admClear" onclick="document.getElementById('prodAdmSearch').value='';document.getElementById('admClear').style.display='none';renderProdAdm()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--c5);font-size:18px;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%">✕</button></div></div>
+    <div id="prodAdm"></div>
+  </div>
+
+  <!-- ADMIN: SOTUVCHILAR -->
+  <div id="tSellers" class="sc" style="display:none">
+    <div class="seg" id="sSeg" style="margin-top:8px"><button class="sb on" onclick="sView('sellers',this)">Ishchilar</button><button class="sb" onclick="sView('instagram',this)">Instagram profil</button><button class="sb" onclick="sView('davomat',this)">Davomat</button></div>
+    <div id="sViewSellers">
+      <button class="btn btnp" style="width:100%;padding:13px;border-radius:10px;margin-bottom:14px;font-size:14px;font-weight:600" onclick="openAddSeller()">+ Ishchi qo'shish</button>
+      <div id="sellerAdm"></div>
+      <!-- Bonus/Jarima sozlamalari -->
+      <div class="sc-card" style="margin-top:12px">
+        <div style="font-size:14px;font-weight:700;color:var(--c1);margin-bottom:12px">Bonus / Jarima sozlamalari</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <label style="font-size:12px;color:var(--c5);display:block;margin-bottom:4px">Bonus chegarasi (%)</label>
+            <input class="inp" type="number" id="bonusConvInp" placeholder="21" style="padding:8px 10px;font-size:14px">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--c5);display:block;margin-bottom:4px">Bonus miqdori (so'm)</label>
+            <input class="inp" type="number" id="bonusAmtInp" placeholder="30000" style="padding:8px 10px;font-size:14px">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--c5);display:block;margin-bottom:4px">Jarima chegarasi (%)</label>
+            <input class="inp" type="number" id="fineConvInp" placeholder="10" style="padding:8px 10px;font-size:14px">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--c5);display:block;margin-bottom:4px">Jarima miqdori (so'm)</label>
+            <input class="inp" type="number" id="fineAmtInp" placeholder="20000" style="padding:8px 10px;font-size:14px">
+          </div>
+        </div>
+        <button class="btn btnp" style="width:100%;padding:10px;border-radius:10px;font-weight:600" onclick="saveBonusConfig()">Saqlash</button>
+      </div>
+      <!-- Xarajatlar bo'limi -->
+    </div>
+    <div id="sViewInstagram" style="display:none">
+      <button class="btn btnp" style="width:100%;padding:13px;border-radius:10px;margin-bottom:14px;font-size:14px;font-weight:600" onclick="openAddIg()">+ Instagram profil qo'shish</button>
+      <div id="igAdm"></div>
+    </div>
+    <div id="sViewDavomat" style="display:none">
+      <div id="davomatContent"></div>
+    </div>
+  </div>
+
+  <!-- SOTUVCHI: PROFIL -->
+  <div id="tSellerProf" class="sc" style="display:none">
+    <div id="sellerProfContent"></div>
+  </div>
+
+  <!-- ADMIN: TAHLIL -->
+  <div id="tTahlil" class="sc" style="display:none">
+    <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;padding-top:8px">
+      <button class="dfilter on" id="tFilterToday" onclick="setTahlilFilter('today',this)">Kecha</button>
+      <button class="dfilter" id="tFilterAll" onclick="setTahlilFilter('all',this)">Jami</button>
+      <button class="dfilter" id="tRangeBtn" onclick="openTahlilRange()">&#128197; Sana tanlash</button>
+    </div>
+    <div id="tahlilPeriod" style="font-size:14px;color:#185FA5;font-weight:600;margin-bottom:10px;padding:5px 10px;background:#EFF6FF;border-radius:8px;display:inline-block"></div>
+
+
+    <!-- Sotuvchilar konversiyasi paneli -->
+    <div id="sellerConvBlock" style="margin-bottom:14px">
+      <div style="background:var(--color-background-secondary,#f9f9f7);border-radius:14px;padding:12px 14px;border:0.5px solid var(--bd)">
+        <div style="font-size:12px;font-weight:700;color:#6b7280;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          SOTUVCHILAR KONVERSIYASI
+        </div>
+        <div id="sellerConvList"></div>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#15803d"></div><span style="font-size:11px;color:var(--c4)">21%+ bonus</span></div>
+          <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#d97706"></div><span style="font-size:11px;color:var(--c4)">10-21% neytral</span></div>
+          <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#dc2626"></div><span style="font-size:11px;color:var(--c4)">10% jarima</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:32px;height:32px;background:#EFF6FF;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--c1)">Instagram profil statistikasi</div>
+          <div style="font-size:13px;color:var(--c5)">Har bir profil bo'yicha reklama tahlili</div>
+        </div>
+      </div>
+      <button id="igExcelBtn" onclick="downloadIgExcel()" style="display:flex;align-items:center;gap:6px;background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Excel
+      </button>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:16px">
+      <table style="width:100%;border-collapse:collapse;font-size:15px;min-width:560px">
+        <thead id="tahlilHead1"><tr style="background:var(--bg)">
+        </tr></thead>
+        <tbody id="tahlilBody1"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:32px;height:32px;background:#F0FDF4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        </div>
+        <div><div style="font-size:14px;font-weight:700;color:var(--c1)">Mahsulot bo'yicha reklama tahlili</div><div style="font-size:13px;color:var(--c5)">Har bir mahsulotga sarflangan budjet va natijalar</div></div>
+      </div>
+      <button id="prodExcelBtn" onclick="downloadProdExcel()" style="display:flex;align-items:center;gap:6px;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Excel
+      </button>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:16px">
+      <table style="width:100%;border-collapse:collapse;font-size:15px;min-width:600px">
+        <thead id="tahlilHead2"><tr style="background:var(--bg)">
+        </tr></thead>
+        <tbody id="tahlilBody2"></tbody>
+      </table>
+    </div>
+
+    <!-- Reklama ro'yxati paneli - jadval tagida -->
+    <div id="activeAdsPanel" style="background:var(--bg1);border-radius:14px;border:0.5px solid var(--bd);margin-top:16px;overflow:hidden"></div>
+
+  </div>
+
+  <!-- TOPSHIRIQLAR VA E'LONLAR -->
+  <div id="tTasks" class="sc" style="display:none"></div>
+
+  <!-- BIZNES STRATEGIYASI -->
+  <div id="tStrategy" class="sc" style="display:none"></div>
+
+  <!-- SOF FOYDA - alohida tab -->
+  <div id="tSofFoyda" class="sc" style="display:none">
+    <div id="sofFoydaBlock" style="margin-bottom:14px">
+      <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px;padding-top:8px">
+        <button class="dfilter sf-filter-btn on" onclick="setSFFilter('today',this)">Bugun</button>
+        <button class="dfilter sf-filter-btn" onclick="setSFFilter('all',this)">Hammasi</button>
+        <button class="dfilter sf-filter-btn" onclick="setSFFilter('range',this)">&#128197; Sana tanlash</button>
+      </div>
+
+      <div style="background:#0F172A;border-radius:16px;padding:18px;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-20px;top:-20px;width:110px;height:110px;background:#1E293B;border-radius:50%"></div>
+        <div style="position:absolute;right:20px;top:20px;width:65px;height:65px;background:#334155;border-radius:50%"></div>
+        <div style="font-size:11px;color:#94A3B8;font-weight:600;letter-spacing:1px;position:relative;z-index:1" id="sfPeriodLabel">DAVR</div>
+        <div style="display:flex;align-items:baseline;gap:6px;position:relative;z-index:1;margin:4px 0 2px">
+          <div style="font-size:30px;font-weight:800;color:#fff" id="sfAmount">0</div>
+          <div style="font-size:12px;color:#94A3B8" id="sfCurrency">so'm</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;position:relative;z-index:1" id="sfSubLabel" style="color:#4ADE80">0% foydalilik</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div style="background:var(--bg1);border-radius:12px;padding:10px 12px;border:0.5px solid var(--bd)">
+          <div style="font-size:11px;color:var(--c4);margin-bottom:2px">Jami daromad</div>
+          <div style="font-size:16px;font-weight:700;color:#16a34a" id="sfRev">0</div>
+          <div style="font-size:11px;color:var(--c4)">so'm</div>
+        </div>
+        <div style="background:var(--bg1);border-radius:12px;padding:10px 12px;border:0.5px solid var(--bd)">
+          <div style="font-size:11px;color:var(--c4);margin-bottom:2px">Jami xarajat</div>
+          <div style="font-size:16px;font-weight:700;color:#dc2626" id="sfExp">0</div>
+          <div style="font-size:11px;color:var(--c4)">so'm</div>
+        </div>
+      </div>
+      <div style="background:var(--bg1);border-radius:12px;padding:12px;border:0.5px solid var(--bd);margin-top:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--c1);margin-bottom:8px">Xarajatlar taqsimoti</div>
+        <div id="sfBreakdown"></div>
+        <div style="background:#F0FDF4;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-top:8px" id="sfNetRow">
+          <div style="display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span style="font-size:12px;font-weight:700;color:#15803D" id="sfNetLabel">Sof foyda</span>
+            <span style="background:#DCFCE7;color:#15803D;padding:2px 6px;border-radius:20px;font-size:11px;font-weight:700" id="sfMarginPill">0%</span>
+          </div>
+          <div style="font-size:16px;font-weight:800;color:#15803D" id="sfNet">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="sc-card" style="margin-top:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:14px;font-weight:700;color:var(--c1)">Oylik xarajatlar</div>
+          <button onclick="openAddExpense()" style="background:#185FA5;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">+ Qo'shish</button>
+        </div>
+        <div id="expenseList"></div>
+      </div>
+  </div>
+
+  <!-- ADMIN: PROFIL -->
+  <div id="tProfile" class="sc" style="display:none">
+    <div class="sc-card" style="margin-bottom:12px;margin-top:8px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:56px;height:56px;border-radius:50%;background:#DBEAFE;color:#1e40af;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0" id="adminAvatar">AK</div>
+        <div><div style="font-size:17px;font-weight:700;color:var(--c1)" id="adminNameDisp">Ali Karimov</div><div style="font-size:15px;color:var(--c4);margin-top:2px">Administrator</div></div>
+      </div>
+      <div style="border-top:1px solid #f0f0ec;padding-top:14px">
+        <div class="fg"><label class="fl">To'liq ism</label><input class="inp" type="text" id="adminName" placeholder="Ism Familiya"></div>
+        <div class="fg"><label class="fl">Login</label><input class="inp" type="text" id="adminLogin" placeholder="login"></div>
+        <div class="fg"><label class="fl">Yangi parol</label><input class="inp" type="password" id="adminPass" placeholder="Bo'sh qoldirsa o'zgarmaydi"></div>
+        <div class="fg"><label class="fl">Parolni tasdiqlang</label><input class="inp" type="password" id="adminPass2" placeholder="Parolni qaytaring"></div>
+        <div id="profileErr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none"></div>
+        <button class="btn btnp" style="width:100%;padding:12px;border-radius:10px;font-weight:600" onclick="saveAdminProfile()">Saqlash</button>
+        <div style="padding-top:14px;border-top:1px solid #f0f0ec;margin-top:4px">
+          <div style="font-size:13px;color:var(--c5);margin-bottom:8px">Test ma'lumotlar</div>
+          <button class="btn" style="width:100%;padding:12px;border-radius:10px;color:#dc2626;border-color:#eee;font-weight:600" onclick="clearTestSales()">&#128465; Test sotuvlarni tozalash</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YETKAZUVCHI/OMBORCHI: DELIVERY -->
+  <div id="tDelivery" class="sc" style="display:none">
+    <div id="deliveryContent"></div>
+  </div>
+
+  <!-- OMBORCHI: WAREHOUSE -->
+  <div id="tWarehouse" class="sc" style="display:none">
+    <div id="warehouseContent"></div>
+  </div>
+
+  <!-- KPI & MAQSADLAR -->
+  <div id="tKPI" class="sc" style="display:none">
+    <div id="kpiContent"></div>
+  </div>
+
+  <!-- VIDEO MULOQOT -->
+  <div id="tVideo" class="sc" style="display:none">
+    <div id="videoContent"></div>
+  </div>
+
+
+  <!-- SOTUVCHI: DASHBOARD -->
+  <div id="tMyD" class="sc" style="display:none">
+    <div class="sg" id="myStats" style="margin-top:8px"></div>
+    <div style="position:sticky;top:0;background:var(--bg);z-index:5;padding:10px 0 6px">
+      <div style="position:relative">
+        <input class="inp" id="sotuvSearch" placeholder="🔍 Mahsulot qidirish..." oninput="clearTimeout(window._st);window._st=setTimeout(()=>{window._sotuvPage=1;renderSotuv()},300);document.getElementById('sotuvClear').style.display=this.value?'flex':'none'" style="background:var(--bg1);border-radius:12px;padding-right:40px">
+        <button id="sotuvClear" onclick="document.getElementById('sotuvSearch').value='';document.getElementById('sotuvClear').style.display='none';renderSotuv()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--c5);font-size:18px;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%">✕</button>
+      </div>
+    </div>
+    <div id="prodList"></div>
+  </div>
+
+  <!-- SOTUVCHI: SOTUV -->
+
+
+  <!-- SOTUVCHI: TARIX -->
+  <div id="tTarix" class="sc" style="display:none">
+    <div id="myMonthlyBlock" style="margin-bottom:14px;margin-top:8px"></div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px">
+      <button class="dfilter on" id="txFilterToday" onclick="setTarixFilter('today',this)">Bugun</button>
+      <button class="dfilter" id="txFilterAll" onclick="setTarixFilter('all',this)">Jami</button>
+      <button class="dfilter" id="txRangeBtn" onclick="openTarixRange()">&#128197; Sana tanlash</button>
+    </div>
+    <div id="tarixPeriod" style="font-size:15px;color:#185FA5;font-weight:600;margin-bottom:10px"></div>
+    <div class="sg" id="tarixSt"></div>
+    <div class="card"><div style="padding:8px 14px;font-size:13px;font-weight:700;color:#185FA5;border-bottom:1px solid #f0f0ec">Batafsil sotuvlar ro'yxati</div><div id="tarixW"></div></div>
+  </div>
+
+  <!-- SOTUVCHI: BUYURTMALAR -->
+  <div id="tMyOrders" class="sc" style="display:none">
+    <div id="myOrdersContent"></div>
+  </div>
+
+  <!-- SOTUVCHI: JAMOA -->
+  <div id="tMyJ" class="sc" style="display:none">
+    <div class="seg" style="margin-top:8px"><button class="sb on" onclick="mjView('s',this)">Sotuvchilar</button><button class="sb" onclick="mjView('i',this)">Instagram</button></div>
+    <div id="mjS"></div><div id="mjI" style="display:none"></div>
+  </div>
+
+  <div id="tabFilterBar" style="display:none;padding:20px 12px 6px;background:var(--bg);border-bottom:0.5px solid var(--bd);position:fixed;top:0;left:220px;right:0;z-index:20;overflow:hidden">
+    <div id="whFilters" style="display:none;gap:6px">
+      <button id="wf_all" onclick="setWarehouseFilter('all')" style="flex:1;text-align:center;padding:7px 4px;border-radius:10px;border:2px solid #185FA5;background:#EFF6FF;color:#185FA5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Hammasi</button>
+      <button id="wf_out" onclick="setWarehouseFilter('out')" style="flex:1;text-align:center;padding:7px 4px;border-radius:10px;border:2px solid var(--bd);background:var(--bg1);color:var(--c4);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Tugagan</button>
+      <button id="wf_low" onclick="setWarehouseFilter('low')" style="flex:1;text-align:center;padding:7px 4px;border-radius:10px;border:2px solid var(--bd);background:var(--bg1);color:var(--c4);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Oz qoldi</button>
+      <button id="wf_ok" onclick="setWarehouseFilter('ok')" style="flex:1;text-align:center;padding:7px 4px;border-radius:10px;border:2px solid var(--bd);background:var(--bg1);color:var(--c4);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Yetarli</button>
+    </div>
+    <div id="delFilters" style="display:none;gap:6px">
+      <button id="df_new" onclick="setDeliveryFilter('new')" style="flex:1;text-align:center;padding:8px 4px;border-radius:10px;border:2px solid #185FA5;background:#EFF6FF;color:#185FA5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Yangi</button>
+      <button id="df_sent" onclick="setDeliveryFilter('sent')" style="flex:1;text-align:center;padding:8px 4px;border-radius:10px;border:2px solid var(--bd);background:var(--bg1);color:var(--c4);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Jo'natildi</button>
+      <button id="df_delivered" onclick="setDeliveryFilter('delivered')" style="flex:1;text-align:center;padding:8px 4px;border-radius:10px;border:2px solid var(--bd);background:var(--bg1);color:var(--c4);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Yetkazildi</button>
+    </div>
+  </div>
+  <div class="tabbar" id="tabbar"></div>
+</div><!-- contentArea -->
+</div><!-- mainLayout -->
+
+<!-- MOBILE SIDEBAR -->
+<div id="sbOverlay" onclick="closeMobileSidebar()"></div>
+<div id="mobileSidebar">
+  <div class="s-logo">
+    <div>
+      <div style="font-size:15px;font-weight:700;color:var(--c1)" id="mobSideTitle">Menu</div>
+      <div style="font-size:12px;color:var(--c4)" id="mobSideSub"></div>
+    </div>
+    <button onclick="closeMobileSidebar()" style="background:none;border:none;cursor:pointer;font-size:24px;color:var(--c5)">×</button>
+  </div>
+  <div class="s-tabs" id="mobileSidebarTabs"></div>
+  <button id="mobileDmToggle" onclick="toggleDarkMode();closeMobileSidebar()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <span>Dark mode</span>
+  </button>
+  <div class="s-logout">
+    <button class="btn" style="width:100%;padding:10px;font-size:14px;color:var(--rd);border-color:var(--bd3)" onclick="doLogout()">Chiqish</button>
+  </div>
+</div>
+</div>
+<input type="file" id="attCamInput" accept="image/*" capture="user" style="display:none" onchange="handleAttPhoto(this)">
+
+  <!-- KPI MODAL -->
+  <div class="cw" id="kpiModalW">
+    <div class="cb" style="max-width:440px;width:100%;max-height:90vh;overflow-y:auto">
+      <div class="bt" id="kpiModalTitle">Maqsad belgilash</div>
+      <div class="fg">
+        <label class="fl">Ishchi</label>
+        <div id="kpiSellerPills" style="display:flex;flex-wrap:wrap;gap:6px;padding:2px 0"></div>
+        <input type="hidden" id="kpiSeller">
+      </div>
+      <div class="fg">
+        <label class="fl">Metrika</label>
+        <div id="kpiTypePills" style="display:flex;flex-wrap:wrap;gap:6px;padding:2px 0"></div>
+        <input type="hidden" id="kpiType">
+      </div>
+      <div class="fg">
+        <label class="fl">Oy</label>
+        <div style="display:flex;align-items:center;gap:8px;background:var(--bg1);border:1px solid var(--bd);border-radius:10px;padding:8px 12px">
+          <button type="button" onclick="_kpiModalMonthNav(-1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--c1);padding:0 4px;font-family:inherit">&#8249;</button>
+          <span id="kpiMonthDisp" style="flex:1;text-align:center;font-size:15px;font-weight:700;color:var(--c1)"></span>
+          <button type="button" onclick="_kpiModalMonthNav(1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--c1);padding:0 4px;font-family:inherit">&#8250;</button>
+        </div>
+        <input type="hidden" id="kpiMonth">
+      </div>
+      <div class="fg">
+        <label class="fl">Oylik maqsad</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="inp" type="number" id="kpiTarget" placeholder="Masalan: 100" min="0" style="flex:1">
+          <span id="kpiUnitLabel" style="font-size:14px;color:var(--c4);font-weight:600;min-width:32px">ta</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn" style="flex:1;padding:12px" onclick="closeKpiModal()">Bekor</button>
+        <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveKpi()">Saqlash</button>
+      </div>
+    </div>
+  </div>
+
+
+<div class="toast" id="toast"></div>
+
+<!-- CONFIRM SOTUV -->
+<div class="cw" id="confW">
+  <div class="cb" style="max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:16px;font-weight:700">&#128722; Buyurtma</div>
+      <button onclick="closeConf()" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="cartItemsList" style="margin-bottom:4px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#EFF6FF;border-radius:10px;margin-bottom:16px">
+      <span style="font-size:14px;font-weight:700;color:#185FA5">Jami to'lov:</span>
+      <span id="cartTotalAmt" style="font-size:16px;font-weight:800;color:#185FA5">0 so'm</span>
+    </div>
+    <div class="fg"><label class="fl">Mijoz ismi <span style="color:#dc2626">*</span></label>
+      <input class="inp" type="text" id="custName" placeholder="Ism Familiya"></div>
+    <div class="fg" style="position:relative"><label class="fl">Telefon raqami <span style="color:#dc2626">*</span></label>
+      <input class="inp" type="tel" id="custPhone" placeholder="XX XXX XXXX" maxlength="9" oninput="fmtPhone(this)" style="padding-left:68px"><span style="position:absolute;left:12px;bottom:10px;font-size:15px;color:#555;pointer-events:none;font-weight:500">+998</span></div>
+    <div class="fg"><label class="fl">Manzil <span style="color:#dc2626">*</span></label>
+      <input class="inp" type="text" id="custAddress" placeholder="Viloyat, Shahar, Ko'cha"></div>
+    <div class="fg">
+      <label class="fl">To'lov turi <span style="color:#dc2626">*</span></label>
+      <div style="display:flex;gap:8px">
+        <button id="payCardBtn" onclick="setPayType('card')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #185FA5;background:#EFF6FF;color:#185FA5;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">&#128179; Karta</button>
+        <button id="payCashBtn" onclick="setPayType('cash')" style="flex:1;padding:10px;border-radius:10px;border:2px solid var(--bd);background:var(--bg1);color:var(--c4);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">&#128181; Naqd</button>
+      </div>
+      <input type="hidden" id="custPayType" value="card">
+    </div>
+    <div class="fg"><label class="fl">Izoh</label>
+      <input class="inp" type="text" id="custNote" placeholder="Masalan: bugun kechgacha yetkazish kerak"></div>
+    <div class="fg">
+      <label class="fl">To'lov cheki</label>
+      <div id="receiptUploadArea" onclick="document.getElementById('receiptFile').click()" style="border:2px dashed #e5e7eb;border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:#fafaf8">
+        <div id="receiptPreview" style="display:none"><img id="receiptImg" style="max-width:100%;max-height:160px;border-radius:8px;object-fit:contain"></div>
+        <div id="receiptPlaceholder" style="color:#999;font-size:13px">&#128247; Chek rasmini yuklang</div>
+      </div>
+      <input type="file" id="receiptFile" accept="image/*" style="display:none" onchange="handleReceiptImg(this)">
+    </div>
+    <div id="confReceiptErr" style="font-size:13px;color:#dc2626;margin-bottom:4px;display:none">&#9888; Karta orqali to'lovda chek rasmi majburiy!</div>
+    <div id="confErr" style="font-size:13px;color:#dc2626;margin-bottom:8px;display:none">Ism, telefon va manzilni to'ldiring!</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeConf()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="confirmSell()">Saqlash &#10003;</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROD SHEET -->
+<div class="mw" id="prodSh">
+  <div class="bs">
+    <div class="bsh"></div>
+    <div class="bt" id="pShT">Mahsulot qo'shish</div>
+    <div class="fg">
+      <label class="fl">Rasmlar yuklash (bir necha rasm yuklash mumkin)</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px" id="imgPreviewList"></div>
+      <div onclick="document.getElementById('imgF').click()" style="border:2px dashed #ddd;border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:#f9f9f7">
+        <div style="font-size:24px;margin-bottom:4px">📷</div>
+        <div style="font-size:13px;color:var(--c4)">+ Rasm qo'shish</div>
+      </div>
+      <input type="file" id="imgF" accept="image/*" multiple style="display:none" onchange="handleImgMulti(this)">
+    </div>
+    <div class="fg"><label class="fl">Instagram profil</label><div id="pIg" style="position:relative"><button type="button" onclick="toggleProdIgDrop()" id="pIgBtn" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1.5px solid var(--bd);border-radius:10px;background:var(--bg1);color:var(--c1);font-size:14px;cursor:pointer;font-family:inherit;text-align:left"><span id="pIgBtnText">Tanlang</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div id="pIgDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg1);border:1.5px solid var(--bd);border-radius:10px;z-index:50;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12)"></div></div><input type="hidden" id="pIgVal"></div>
+    <div class="fg"><label class="fl">Mahsulot nomi</label><input class="inp" type="text" id="pN" placeholder="Masalan: Ko'zoynak"></div>
+    <div class="fg"><label class="fl">Narx (so'm)</label><input class="inp" type="number" id="pPr" placeholder="1500000" min="0" oninput="if(this.value<0)this.value=''"></div>
+    <div class="fg"><label class="fl">Tannarx (so'm)</label><input class="inp" type="number" id="pCost" placeholder="Sotib olish narxi" min="0" oninput="if(this.value<0)this.value=''"></div>
+    <div class="fg"><label class="fl">Boshlang'ich soni (dona)</label><input class="inp" type="number" id="pStock" placeholder="Masalan: 10" min="0"></div>
+    <div id="pErr" style="font-size:13px;color:#dc2626;margin-bottom:8px;display:none"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeSh('prodSh')">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveProd()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- SELLER SHEET -->
+<div class="mw" id="selSh">
+  <div class="bs">
+    <div class="bsh"></div>
+    <div class="bt" id="selShT">Sotuvchi qo'shish</div>
+    <div class="fg"><label class="fl">To'liq ism</label><input class="inp" type="text" id="sNm" placeholder="Ism Familiya"></div>
+    <div class="fg" id="loginFg"><label class="fl">Login</label><input class="inp" type="text" id="sLg" placeholder="login123"></div>
+    <div class="fg" id="passFg"><label class="fl">Parol</label><input class="inp" type="text" id="sPw" placeholder="parol"></div>
+    <div class="fg" id="salaryFg" style="display:none"><label class="fl">Oylik maosh (so'm)</label><input class="inp" type="number" id="sSalary" placeholder="Masalan: 1000000"></div>
+    <div class="fg" id="commFg"><label class="fl" id="commLabel">1 sotuv uchun haq (so'm)</label><input class="inp" type="number" id="sComm" placeholder="Masalan: 10000"></div>
+    <div class="fg">
+      <label class="fl">Lavozim</label>
+      <select class="inp" id="sRole" onchange="onRoleChange()">
+        <option value="sotuvchi">Sotuvchi</option>
+        <option value="targetolog">Targetolog</option>
+        <option value="mobilograf">Mobilograf</option>
+        <option value="omborchi">Omborchi</option>
+        <option value="yetkazuvchi">Yetkazuvchi</option>
+      </select>
+    </div>
+    <div class="fg" id="igField"><label class="fl">Instagram profil</label><select class="inp" id="sIg"></select></div>
+    <div class="fg" id="startDateFg" style="display:none">
+      <label class="fl">Ish boshlagan sana</label>
+      <div style="display:flex;gap:6px">
+        <input class="inp" type="number" id="sStartDay" onchange="updateStartDate()" placeholder="KK" min="1" max="31" style="width:60px;text-align:center">
+        <input class="inp" type="number" id="sStartMonth" onchange="updateStartDate()" placeholder="OO" min="1" max="12" style="width:60px;text-align:center">
+        <input class="inp" type="number" id="sStartYear" onchange="updateStartDate()" placeholder="YYYY" min="2020" max="2099" style="flex:1;text-align:center">
+      </div>
+      <input type="hidden" id="sStartDate">
+    </div>
+    <div id="selErr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none">Barcha maydonlarni to'ldiring</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeSh('selSh')">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveSeller()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSTAGRAM SHEET -->
+<div class="mw" id="igSh">
+  <div class="bs">
+    <div class="bsh"></div>
+    <div class="bt" id="igShT">Instagram profil qo'shish</div>
+    <div class="fg"><label class="fl">Instagram username</label><input class="inp" type="text" id="igNm" placeholder="@username"></div>
+    <div id="igErr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none">Username kiriting</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeSh('igSh')">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveIg()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- RANGE PICKER -->
+<div id="rangePickerW" style="display:none;position:fixed;inset:0;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);z-index:100">
+  <div style="background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;max-width:480px">
+    <div style="width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:4px;color:var(--c1)">Sana oraligini tanlang</div>
+    <div style="font-size:15px;color:var(--c4);margin-bottom:16px" id="rangeHint">Boshlangich sanani tanlang</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <button onclick="calPrev()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:#555">&#8249;</button>
+      <div id="calMonthLabel" style="font-size:15px;font-weight:600;color:var(--c1)"></div>
+      <button onclick="calNext()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:#555">&#8250;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:6px">
+      <div style="font-size:14px;color:var(--c5);padding:4px">Yak</div><div style="font-size:14px;color:var(--c5);padding:4px">Du</div><div style="font-size:14px;color:var(--c5);padding:4px">Se</div><div style="font-size:14px;color:var(--c5);padding:4px">Ch</div><div style="font-size:14px;color:var(--c5);padding:4px">Pa</div><div style="font-size:14px;color:var(--c5);padding:4px">Ju</div><div style="font-size:14px;color:var(--c5);padding:4px">Sh</div>
+    </div>
+    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center"><div style="font-size:13px;color:var(--c5);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Boshlanish</div><div style="font-size:14px;font-weight:600;color:#185FA5" id="fromDisp">-</div></div>
+      <div style="display:flex;align-items:center;color:#ccc;font-size:20px">&#8594;</div>
+      <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center"><div style="font-size:13px;color:var(--c5);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Tugash</div><div style="font-size:14px;font-weight:600;color:#185FA5" id="toDisp">-</div></div>
+    </div>
+    <div id="rangeErr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none">Ikkala sanani ham tanlang</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeRangePicker()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="applyRange()">Ko'rsatish</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAHLIL RANGE PICKER -->
+<div id="tahlilRangeW" style="display:none;position:fixed;inset:0;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);z-index:100">
+  <div style="background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;max-width:480px">
+    <div style="width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:4px;color:var(--c1)">Tahlil uchun sana tanlang</div>
+    <div style="font-size:15px;color:var(--c4);margin-bottom:16px" id="tahlilRangeHint">Boshlangich sanani tanlang</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <button onclick="tCalPrev()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:#555">&#8249;</button>
+      <div id="tCalLabel" style="font-size:15px;font-weight:600;color:var(--c1)"></div>
+      <button onclick="tCalNext()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:#555">&#8250;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:6px">
+      <div style="font-size:14px;color:var(--c5);padding:4px">Yak</div><div style="font-size:14px;color:var(--c5);padding:4px">Du</div><div style="font-size:14px;color:var(--c5);padding:4px">Se</div><div style="font-size:14px;color:var(--c5);padding:4px">Ch</div><div style="font-size:14px;color:var(--c5);padding:4px">Pa</div><div style="font-size:14px;color:var(--c5);padding:4px">Ju</div><div style="font-size:14px;color:var(--c5);padding:4px">Sh</div>
+    </div>
+    <div id="tCalGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center"><div style="font-size:13px;color:var(--c5);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Boshlanish</div><div style="font-size:14px;font-weight:600;color:#185FA5" id="tFromDisp">-</div></div>
+      <div style="display:flex;align-items:center;color:#ccc;font-size:20px">&#8594;</div>
+      <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center"><div style="font-size:13px;color:var(--c5);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Tugash</div><div style="font-size:14px;font-weight:600;color:#185FA5" id="tToDisp">-</div></div>
+    </div>
+    <div id="tahlilRangeErr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none">Ikkala sanani ham tanlang</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeTahlilRange()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="applyTahlilRange()">Ko'rsatish</button>
+    </div>
+  </div>
+</div>
+<div id="sfRangeW" style="display:none;position:fixed;inset:0;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);z-index:100">
+  <div style="background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;max-width:480px">
+    <div style="width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:4px;color:var(--c1)">Tahlil uchun sana tanlang</div>
+    <div style="font-size:15px;color:var(--c4);margin-bottom:16px" id="sfRangeHint">Boshlangich sanani tanlang</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <button onclick="sfCalPrev()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:#555">&#8249;</button>
+      <div id="sfCalLabel" style="font-size:15px;font-weight:600;color:var(--c1)"></div>
+      <button onclick="sfCalNext()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:#555">&#8250;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:6px">
+      <div style="font-size:14px;color:var(--c5);padding:4px">Yak</div><div style="font-size:14px;color:var(--c5);padding:4px">Du</div><div style="font-size:14px;color:var(--c5);padding:4px">Se</div><div style="font-size:14px;color:var(--c5);padding:4px">Ch</div><div style="font-size:14px;color:var(--c5);padding:4px">Pa</div><div style="font-size:14px;color:var(--c5);padding:4px">Ju</div><div style="font-size:14px;color:var(--c5);padding:4px">Sh</div>
+    </div>
+    <div id="sfCalGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center"><div style="font-size:13px;color:var(--c5);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Boshlanish</div><div style="font-size:14px;font-weight:600;color:#185FA5" id="sfFromDisp">-</div></div>
+      <div style="display:flex;align-items:center;color:#ccc;font-size:20px">&#8594;</div>
+      <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center"><div style="font-size:13px;color:var(--c5);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Tugash</div><div style="font-size:14px;font-weight:600;color:#185FA5" id="sfToDisp">-</div></div>
+    </div>
+    <div id="sfRangeErr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none">Ikkala sanani ham tanlang</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeSFRange()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="applySFRangeCalendar()">Ko'rsatish</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPSHIRIQ MODALI -->
+<div class="cw" id="taskModalW">
+  <div class="cb" style="max-width:440px;width:100%;max-height:90vh;overflow-y:auto">
+    <div class="bt" id="taskModalTitle">Topshiriq qo'shish</div>
+    <div class="fg"><label class="fl">Topshiriq nomi <span style="color:#dc2626">*</span></label><input class="inp" id="tskTitleInp" placeholder="Masalan: Bugungi hisobot"></div>
+    <div class="fg"><label class="fl">Tavsif</label><textarea class="inp" id="tskDescInp" rows="3" placeholder="Batafsil..." style="resize:none;height:80px"></textarea></div>
+    <div class="fg"><label class="fl">Muhimlik</label>
+      <div id="tskPriorityPills" style="display:flex;gap:6px;margin-top:2px"></div>
+      <input type="hidden" id="tskPriorityInp" value="oddiy">
+    </div>
+    <div class="fg"><label class="fl">Muddat</label>
+      <button type="button" id="tskDueBtn" onclick="openTskCal()" style="width:100%;padding:10px 12px;border:1px solid var(--bd4);border-radius:8px;background:var(--bg1);color:var(--c1);font-size:14px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="tskDueBtnText">Sana tanlang</span>
+      </button>
+      <input type="hidden" id="tskDueInp">
+    </div>
+    <div class="fg"><label class="fl">Status</label>
+      <div id="tskStatusPills" style="display:flex;gap:6px;margin-top:2px"></div>
+      <input type="hidden" id="tskStatusInp" value="yangi">
+    </div>
+    <div class="fg"><label class="fl">Kimga</label><div id="tskAssignees"></div></div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeTaskModal()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveTask()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPSHIRIQ MUDDAT KALENDARI -->
+<div id="tskCalW" style="display:none;position:fixed;inset:0;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);z-index:200">
+  <div style="background:var(--bg1);border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;max-width:480px">
+    <div style="width:36px;height:4px;background:var(--bd4);border-radius:2px;margin:0 auto 16px"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:16px;color:var(--c1)">Muddat sanasini tanlang</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <button onclick="tskCalPrev()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:var(--c3)">&#8249;</button>
+      <div id="tskCalLabel" style="font-size:15px;font-weight:600;color:var(--c1)"></div>
+      <button onclick="tskCalNext()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:var(--c3)">&#8250;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:6px">
+      <div style="font-size:12px;color:var(--c5);padding:4px">Yak</div><div style="font-size:12px;color:var(--c5);padding:4px">Du</div><div style="font-size:12px;color:var(--c5);padding:4px">Se</div><div style="font-size:12px;color:var(--c5);padding:4px">Ch</div><div style="font-size:12px;color:var(--c5);padding:4px">Pa</div><div style="font-size:12px;color:var(--c5);padding:4px">Ju</div><div style="font-size:12px;color:var(--c5);padding:4px">Sh</div>
+    </div>
+    <div id="tskCalGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:16px"></div>
+    <button class="btn" style="width:100%;padding:12px" onclick="closeTskCal()">Bekor</button>
+  </div>
+</div>
+
+<!-- E'LON MODALI -->
+<div class="cw" id="annModalW">
+  <div class="cb" style="max-width:440px;width:100%;max-height:90vh;overflow-y:auto">
+    <div class="bt" id="annModalTitle">E'lon qo'shish</div>
+    <div class="fg"><label class="fl">Sarlavha <span style="color:#dc2626">*</span></label><input class="inp" id="annTitleInp" placeholder="Masalan: Ish vaqti o'zgarishi"></div>
+    <div class="fg"><label class="fl">Matn</label><textarea class="inp" id="annBodyInp" rows="4" placeholder="E'lon matni..." style="resize:none;height:100px"></textarea></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:0 2px">
+      <input type="checkbox" id="annPinnedInp" style="width:18px;height:18px;cursor:pointer;accent-color:#185FA5">
+      <label for="annPinnedInp" style="font-size:14px;cursor:pointer;color:var(--c1)">📌 Muhim (pin) — tepada ko'rsatiladi</label>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeAnnModal()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveAnn()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- KPI MAQSAD MODALI -->
+<div class="cw" id="stratKpiModalW">
+  <div class="cb" style="max-width:400px;width:100%">
+    <div class="bt" id="stratKpiMonthLbl">KPI Maqsadlar</div>
+    <div class="fg"><label class="fl">Sotuvlar soni maqsadi (ta)</label><input class="inp" type="number" id="stratKpiSales" placeholder="Masalan: 200" min="0"></div>
+    <div class="fg"><label class="fl">Daromad maqsadi (so'm)</label><input class="inp" type="number" id="stratKpiRevenue" placeholder="Masalan: 50000000" min="0"></div>
+    <div class="fg"><label class="fl">Faol sotuvchilar maqsadi (ta)</label><input class="inp" type="number" id="stratKpiActive" placeholder="Masalan: 4" min="0"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeStratKpiModal()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveStratKpi()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- QAROR MODALI -->
+<div class="cw" id="decModalW">
+  <div class="cb" style="max-width:440px;width:100%;max-height:90vh;overflow-y:auto">
+    <div class="bt" id="decModalTitle">Qaror qo'shish</div>
+    <div class="fg"><label class="fl">Qaror matni <span style="color:#dc2626">*</span></label><input class="inp" id="decTextInp" placeholder="Masalan: Yangi yetkazib beruvchi bilan shartnoma tuzish"></div>
+    <div class="fg"><label class="fl">Izoh / Sabab</label><textarea class="inp" id="decNoteInp" rows="3" placeholder="Nima uchun bu qaror qabul qilindi..." style="resize:none;height:80px"></textarea></div>
+    <div class="fg"><label class="fl">Sana</label><input class="inp" type="date" id="decDateInp"></div>
+    <div class="fg"><label class="fl">Mas'ul shaxs</label><input class="inp" id="decAssigneeInp" placeholder="Masalan: Farruh"></div>
+    <div class="fg"><label class="fl">Holat</label>
+      <select class="inp" id="decStatusInp">
+        <option value="rejalashtirilgan">Rejalashtirilgan</option>
+        <option value="jarayonda">Jarayonda</option>
+        <option value="bajarildi">Bajarildi</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeDecModal()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveDec()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- XARAJAT QO'SHISH -->
+<div class="cw" id="expenseW">
+  <div class="cb" style="max-height:90vh;overflow-y:auto">
+    <div style="font-size:16px;font-weight:600;margin-bottom:16px" id="expenseTitle">Xarajat qo'shish</div>
+    <div class="fg"><label class="fl">Nomi</label><input class="inp" type="text" id="expName" placeholder="Masalan: Ko'zoynak do'kon arendasi"></div>
+    <div class="fg"><label class="fl">Oylik miqdori (so'm)</label><input class="inp" type="number" id="expAmount" placeholder="Masalan: 2500000"></div>
+    <div class="fg"><label class="fl">Boshlanish sanasi</label>
+      <div style="display:flex;gap:6px">
+        <input class="inp" type="number" id="expDay" placeholder="KK" min="1" max="31" style="width:60px;text-align:center" onchange="updateExpDate()">
+        <input class="inp" type="number" id="expMonth" placeholder="OO" min="1" max="12" style="width:60px;text-align:center" onchange="updateExpDate()">
+        <input class="inp" type="number" id="expYear" placeholder="YYYY" min="2020" max="2099" style="flex:1;text-align:center" onchange="updateExpDate()">
+      </div>
+      <input type="hidden" id="expDate">
+    </div>
+    <div id="expErr" style="font-size:13px;color:#dc2626;margin-bottom:10px;display:none">Barcha maydonlarni to'ldiring</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeSh('expenseW')">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveExpense()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- RASM TANLASH MODALI -->
+<div class="cw" id="imgSelW">
+  <div class="cb" style="max-width:380px;max-height:85vh;overflow-y:auto">
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px" id="imgSelTitle">Rasmni tanlang</div>
+    <div style="font-size:13px;color:var(--c4);margin-bottom:14px">Kerakli rasmni tanlang</div>
+    <div id="imgSelGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeImgSel()">Bekor qilish</button>
+      <button class="btn" style="flex:1;padding:12px;background:#185FA5;color:white;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit" onclick="confirmImgSel_img()">Tanlash</button>
+    </div>
+  </div>
+</div>
+<!-- ADD ACTIVE AD MODAL -->
+<div class="cw" id="addAdW">
+  <div class="cb">
+    <div style="font-size:16px;font-weight:700;margin-bottom:14px">Reklamaga mahsulot qo'shish</div>
+    <div id="addAdBody"></div>
+    <div id="addAdErr" style="font-size:13px;color:#dc2626;margin-bottom:8px;display:none">Tanlang!</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="document.getElementById('addAdW').classList.remove('show')">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveActiveAd()">Qo'shish ✓</button>
+    </div>
+  </div>
+</div>
+<!-- STATUS CONFIRM MODAL -->
+<div class="cw" id="_statusConfW" style="align-items:flex-end">
+  <div style="background:var(--bg1);border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:480px">
+    <div style="width:40px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 20px"></div>
+    <div style="font-size:17px;font-weight:700;margin-bottom:8px;text-align:center" id="_statusConfTitle">Status o'zgartirish</div>
+    <div style="font-size:14px;color:#666;text-align:center;margin-bottom:24px;line-height:1.5" id="_statusConfText"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:13px;border-radius:12px;font-size:15px" onclick="document.getElementById('_statusConfW').classList.remove('show')">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:13px;border-radius:12px;font-size:15px;font-weight:700" onclick="_confirmStatusChange()">Tasdiqlash ✓</button>
+    </div>
+  </div>
+</div>
+<!-- ADD STOCK MODAL -->
+<div class="cw" id="_addStockW">
+  <div class="cb">
+    <div style="font-size:14px;font-weight:600;margin-bottom:4px" id="_addStockTitle"></div>
+    <div style="font-size:13px;color:var(--c4);margin-bottom:14px">Nechta yangi tovar qo'shildi?</div>
+    <input class="inp" type="number" id="_addStockInp" placeholder="Masalan: 10" min="1" style="margin-bottom:12px">
+    <input type="hidden" id="_addStockId">
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="document.getElementById('_addStockW').classList.remove('show')">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="_confirmAddStock()">Qo'shish ✓</button>
+    </div>
+  </div>
+</div>
+<!-- TAHLIL EDIT -->
+<div id="tahlilEditW" style="display:none;position:fixed;inset:0;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);z-index:100">
+  <div style="background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
+    <div style="width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:4px;color:var(--c1)" id="tahlilEditTitle">Ma'lumot kiritish</div>
+    <div style="font-size:15px;color:var(--c4);margin-bottom:16px" id="tahlilEditSub"></div>
+    <div id="tahlilEditFields"></div>
+    <div id="tahlilEditErr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none">To'ldiring</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeTahlilEdit()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="saveTahlilEdit()">Saqlash</button>
+    </div>
+  </div>
+</div>
+<!-- TARIX RANGE PICKER -->
+<div id="tarixRangeW" style="display:none;position:fixed;inset:0;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);z-index:100">
+  <div style="background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 32px;width:100%;max-width:480px">
+    <div style="width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:4px;color:var(--c1)">Sana tanlash</div>
+    <div style="font-size:15px;color:var(--c4);margin-bottom:16px" id="txRangeHint">Boshlangich sanani tanlang</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <button onclick="txCalPrev()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:#555">&#8249;</button>
+      <div id="txCalLabel" style="font-size:15px;font-weight:600;color:var(--c1)"></div>
+      <button onclick="txCalNext()" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px 10px;color:#555">&#8250;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:6px">
+      <div style="font-size:14px;color:var(--c5);padding:4px">Yak</div><div style="font-size:14px;color:var(--c5);padding:4px">Du</div><div style="font-size:14px;color:var(--c5);padding:4px">Se</div><div style="font-size:14px;color:var(--c5);padding:4px">Ch</div><div style="font-size:14px;color:var(--c5);padding:4px">Pa</div><div style="font-size:14px;color:var(--c5);padding:4px">Ju</div><div style="font-size:14px;color:var(--c5);padding:4px">Sh</div>
+    </div>
+    <div id="txCalGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center"><div style="font-size:13px;color:var(--c5);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Boshlanish</div><div style="font-size:14px;font-weight:600;color:#185FA5" id="txFromDisp">-</div></div>
+      <div style="display:flex;align-items:center;color:#ccc;font-size:20px">&#8594;</div>
+      <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center"><div style="font-size:13px;color:var(--c5);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Tugash</div><div style="font-size:14px;font-weight:600;color:#185FA5" id="txToDisp">-</div></div>
+    </div>
+    <div id="txRangeErr" style="font-size:15px;color:#dc3545;margin-bottom:10px;display:none">Ikkala sanani ham tanlang</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeTarixRange()">Bekor</button>
+      <button class="btn btnp" style="flex:1;padding:12px;border-radius:8px;font-weight:600" onclick="applyTarixRange()">Ko'rsatish</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT IMAGE MODAL -->
+<div id="prodImgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:20px;overflow:hidden;width:min(340px,90vw);box-shadow:0 24px 64px rgba(0,0,0,.3);position:relative">
+    <div style="position:relative;background:var(--bg)">
+      <img id="prodImgBig" src="" style="width:100%;max-height:300px;object-fit:contain;display:block;padding:16px">
+      <button onclick="document.getElementById('prodImgModal').style.display='none'" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;line-height:1">&#215;</button>
+    </div>
+    <div id="prodImgName" style="padding:14px 16px;font-size:15px;font-weight:700;color:var(--c1);border-top:1px solid #f0f0ec"></div>
+    <div id="prodImgPrice" style="padding:0 16px 16px;font-size:14px;color:#185FA5;font-weight:600"></div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="cw" id="delConfW">
+  <div class="cb">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="width:52px;height:52px;background:#FEF2F2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+      </div>
+      <div style="font-size:16px;font-weight:700;color:var(--c1);margin-bottom:6px" id="delConfTitle">O'chirishni tasdiqlang</div>
+      <div style="font-size:14px;color:var(--c4)" id="delConfText">Bu ishchini o'chirasizmi?</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1;padding:12px" onclick="closeDelConf()">Bekor qilish</button>
+      <button style="flex:1;padding:12px;border-radius:8px;font-weight:600;background:#dc2626;color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:14px" onclick="execDel()">Ha, o'chirish</button>
+    </div>
+  </div>
+</div>
+
+<!-- Instagram tanlash modali -->
+<div id="igSelW" class="cw" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)closeIgSel()">
+  <div style="background:var(--bg1);border-radius:20px;width:100%;max-width:360px;padding:20px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700">Instagram tanlang</div>
+      <button onclick="closeIgSel()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--c5);line-height:1">&times;</button>
+    </div>
+    <div id="igSelBody"></div>
+    <button onclick="confirmIgSel()" style="width:100%;padding:14px;background:#185FA5;color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit">Davom etish →</button>
+  </div>
+</div>
+<script src="https://meet.jit.si/external_api.js"></script>
+<script src="js/core.js"></script>
+<script src="js/tabs.js"></script>
+<script src="js/seller.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/delivery.js"></script>
+<script src="js/warehouse.js"></script>
+<script src="js/bonus.js"></script>
+<script src="js/tasks.js"></script>
+<script src="js/strategy.js"></script>
+<script src="js/extra.js"></script>
+<script src="js/video.js"></script>
+<script type="module" src="js/firebase.js"></script>
+</body>
+</html>
