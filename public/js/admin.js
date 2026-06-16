@@ -1,12 +1,66 @@
-﻿function renderProdAdm(){
+﻿// ===== DAVOMAT (ADMIN SIDE) =====
+let _davomatDate=today();
+async function renderDavomat(){
+  const el=document.getElementById('davomatContent');
+  if(!el) return;
+  el.innerHTML=`<div style="text-align:center;padding:24px;color:var(--c4)">Yuklanmoqda...</div>`;
+  const att=await window.FS.loadAttendanceByDate(_davomatDate);
+  const sellers=D.sellers.filter(s=>s.role==='sotuvchi'&&s.name);
+  const cards=sellers.map(sel=>{
+    const keldi=att.find(a=>String(a.sellerId)===String(sel.id)&&a.type==='keldi');
+    const ketdi=att.find(a=>String(a.sellerId)===String(sel.id)&&a.type==='ketdi');
+    const ROLE_LABELS={sotuvchi:'Sotuvchi',targetolog:'Targetolog',omborchi:'Omborchi',yetkazuvchi:'Yetkazuvchi'};
+    const keldiHtml=keldi
+      ?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <span style="background:#DCFCE7;color:#16a34a;padding:3px 10px;border-radius:8px;font-size:13px;font-weight:700">&#10003; Keldi: ${keldi.time}</span>
+          ${keldi.photoUrl?`<img src="${keldi.photoUrl}" onclick="this.style.width=this.style.width==='100%'?'80px':'100%'" style="width:80px;height:80px;object-fit:cover;border-radius:10px;cursor:pointer" onerror="this.style.display='none'">`:''}</div>`
+      :`<div style="margin-top:8px"><span style="background:#FEF2F2;color:#dc2626;padding:3px 10px;border-radius:8px;font-size:13px;font-weight:700">&#10007; Kelmagan</span></div>`;
+    const ketdiHtml=ketdi
+      ?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <span style="background:#FEF2F2;color:#dc2626;padding:3px 10px;border-radius:8px;font-size:13px;font-weight:700">&#10003; Ketdi: ${ketdi.time}</span>
+          ${ketdi.photoUrl?`<img src="${ketdi.photoUrl}" onclick="this.style.width=this.style.width==='100%'?'80px':'100%'" style="width:80px;height:80px;object-fit:cover;border-radius:10px;cursor:pointer" onerror="this.style.display='none'">`:''}</div>`
+      :(keldi?`<div style="margin-top:6px"><span style="background:#FEF3C7;color:#92400e;padding:3px 10px;border-radius:8px;font-size:13px;font-weight:700">&#8212; Hali ketmagan</span></div>`:'');
+    return`<div style="background:var(--bg1);border-radius:14px;padding:14px;border:0.5px solid var(--bd);margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="av" style="${avSt(sel.ai||0)};width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0">${ini(sel.name)}</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--c1)">${sel.name}</div>
+          <div style="font-size:12px;color:var(--c4)">${ROLE_LABELS[sel.role]||sel.role||''}</div>
+        </div>
+      </div>
+      ${keldiHtml}${ketdiHtml}
+    </div>`;
+  }).join('');
+  const datePick=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <input type="date" class="inp" id="davomatDateInp" value="${_davomatDate}" style="flex:1;padding:8px 10px;font-size:14px" onchange="_davomatDate=this.value;renderDavomat()">
+  </div>`;
+  const keldCount=sellers.filter(sel=>att.find(a=>String(a.sellerId)===String(sel.id)&&a.type==='keldi')).length;
+  const summary=`<div style="display:flex;gap:8px;margin-bottom:12px">
+    <div style="flex:1;background:#DCFCE7;border-radius:10px;padding:10px;text-align:center">
+      <div style="font-size:20px;font-weight:800;color:#16a34a">${keldCount}</div>
+      <div style="font-size:12px;color:#16a34a">Keldi</div>
+    </div>
+    <div style="flex:1;background:#FEF2F2;border-radius:10px;padding:10px;text-align:center">
+      <div style="font-size:20px;font-weight:800;color:#dc2626">${sellers.length-keldCount}</div>
+      <div style="font-size:12px;color:#dc2626">Kelmagan</div>
+    </div>
+    <div style="flex:1;background:var(--bg2);border-radius:10px;padding:10px;text-align:center">
+      <div style="font-size:20px;font-weight:800;color:var(--c1)">${sellers.length}</div>
+      <div style="font-size:12px;color:var(--c4)">Jami</div>
+    </div>
+  </div>`;
+  el.innerHTML=datePick+summary+cards;
+}
+
+function renderProdAdm(){
   const searchEl=document.getElementById('prodAdmSearch');
   const q=searchEl?searchEl.value.trim().toLowerCase():'';
   const allProds=q?D.products.filter(p=>p.name.toLowerCase().includes(q)):D.products;
   const _PAGE=20,_page=window._prodAdmPage||1,_total=allProds.length,_start=(_page-1)*_PAGE;
   const prods=allProds.slice(_start,_start+_PAGE);
-  const _h=_total?'<div style="font-size:13px;font-weight:700;color:#999;padding:8px 4px 6px">Mahsulotlar '+(_start+1)+'–'+Math.min(_start+_PAGE,_total)+' / '+_total+'</div>':'';
+  const _h=_total?'<div style="font-size:13px;font-weight:700;color:var(--c5);padding:8px 4px 6px">Mahsulotlar '+(_start+1)+'–'+Math.min(_start+_PAGE,_total)+' / '+_total+'</div>':'';
   let _pagin='';
-  if(Math.ceil(_total/_PAGE)>1){const _tp=Math.ceil(_total/_PAGE);let _bt='';for(let i=1;i<=_tp;i++){const on=i===_page;_bt+='<button onclick="window._prodAdmPage='+i+';renderProdAdm()" style="min-width:34px;height:34px;border-radius:8px;border:'+(on?'2px solid #185FA5':'1px solid #e5e7eb')+';background:'+(on?'#EFF6FF':'white')+';color:'+(on?'#185FA5':'#555')+';font-size:14px;cursor:pointer;font-family:inherit">'+i+'</button>';}_pagin='<div style="padding:14px 0;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap"><button onclick="if(window._prodAdmPage>1){window._prodAdmPage--;renderProdAdm()}" '+(_page===1?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;opacity:'+(_page===1?'.4':'1')+'">&#8249;</button>'+_bt+'<button onclick="if(window._prodAdmPage<'+_tp+'){window._prodAdmPage++;renderProdAdm()}" '+(_page===_tp?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;opacity:'+(_page===_tp?'.4':'1')+'">&#8250;</button></div>';}
+  if(Math.ceil(_total/_PAGE)>1){const _tp=Math.ceil(_total/_PAGE);let _bt='';for(let i=1;i<=_tp;i++){const on=i===_page;_bt+='<button onclick="window._prodAdmPage='+i+';renderProdAdm()" style="min-width:34px;height:34px;border-radius:8px;border:'+(on?'2px solid var(--p)':'1px solid var(--bd)')+';background:'+(on?'var(--pbg)':'var(--bg1)')+';color:'+(on?'var(--p)':'var(--c2)')+';font-size:14px;cursor:pointer;font-family:inherit">'+i+'</button>';}_pagin='<div style="padding:14px 0;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap"><button onclick="if(window._prodAdmPage>1){window._prodAdmPage--;renderProdAdm()}" '+(_page===1?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);color:var(--c2);font-size:16px;cursor:pointer;opacity:'+(_page===1?'.4':'1')+'">&#8249;</button>'+_bt+'<button onclick="if(window._prodAdmPage<'+_tp+'){window._prodAdmPage++;renderProdAdm()}" '+(_page===_tp?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);color:var(--c2);font-size:16px;cursor:pointer;opacity:'+(_page===_tp?'.4':'1')+'">&#8250;</button></div>';}
   const _prodHtml=prods.map(p=>{
     const tot=D.sales.filter(s=>s.pid===p.id).length;
     const left=getStockLeft(p);
@@ -18,7 +72,7 @@
       :'<div style="display:inline-block;padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700;background:#DCFCE7;color:#14532d;margin-bottom:3px">'+left+' ta bor</div>';
     const ih=p.img?`<img src="${p.img}" class="pi">`:`<div class="pib"><div class="pib-inner"><div style="width:60px;height:60px;border-radius:14px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:24px">&#128230;</div></div></div>`;
     return`<div class="pc" style="display:flex;flex-direction:row;align-items:stretch">
-  <div style="width:110px;flex-shrink:0;background:#f8f8f6;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border-radius:12px 0 0 12px;position:relative" onclick="showProdImg(${p.id})" style="cursor:pointer">
+  <div style="width:110px;flex-shrink:0;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border-radius:12px 0 0 12px;position:relative" onclick="showProdImg(${p.id})" style="cursor:pointer">
     ${(()=>{const imgs=p.imgs&&p.imgs.length?p.imgs:(p.img?[p.img]:[]);if(!imgs.length) return '<div style="width:60px;height:60px;border-radius:10px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:24px">&#128230;</div>';return '<img src="'+imgs[0]+'" style="width:110px;height:110px;object-fit:contain;padding:8px">'+(imgs.length>1?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.5);color:white;font-size:10px;padding:2px 5px;border-radius:6px">+'+imgs.length+'</div>':'');})()}
   </div>
   <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
@@ -26,7 +80,7 @@
       <div style="font-size:14px;font-weight:700;margin-bottom:3px">${p.name}</div>${stockBadge}
       <div style="font-size:14px;color:#5b21b6;font-weight:600;margin-bottom:3px">${gI(p.igId)?gI(p.igId).name:'Instagram biriktirilmagan'}</div>
       <div style="font-size:13px;color:#185FA5;font-weight:600;margin-bottom:2px">${fmt(p.price)} so'm</div>
-      <div style="font-size:14px;color:#888">Sotildi: ${tot} ta</div>
+      <div style="font-size:14px;color:var(--c4)">Sotildi: ${tot} ta</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn" style="flex:1;padding:8px;font-size:15px" onclick="openEditProd(${p.id})">Tahrirlash</button>
@@ -68,16 +122,16 @@ function renderSellers(){
             <div style="font-size:14px;font-weight:600">${sel.name}</div>
             ${rb(sel.role||'sotuvchi')}
           </div>
-          <div style="font-size:15px;color:#888">@${sel.login}${!isTarj&&ig?' - <span style="color:#5b21b6">'+ig.name+'</span>':''}</div>
+          <div style="font-size:15px;color:var(--c4)">@${sel.login}${!isTarj&&ig?' - <span style="color:#5b21b6">'+ig.name+'</span>':''}</div>
         </div>
-        <div style="font-size:13px;color:#888;white-space:nowrap">${isTarj?(sel.comm?fmt(sel.comm)+" so'm/oy":'Targetolog'):(sel.salary?fmt(sel.salary)+" so'm/oy + ":'')+tot+' sotuv'}</div>
+        <div style="font-size:13px;color:var(--c4);white-space:nowrap">${isTarj?(sel.comm?fmt(sel.comm)+" so'm/oy":'Targetolog'):(sel.salary?fmt(sel.salary)+" so'm/oy + ":'')+tot+' sotuv'}</div>
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn" style="flex:1;padding:9px" onclick="openEditSeller(${sel.id})">Tahrirlash</button>
         <button class="btn btnd" style="flex:1;padding:9px" onclick="delSeller(${sel.id})">O'chirish</button>
       </div>
     </div>`;
-  }).join('')||"<div style='font-size:13px;color:#999'>Ishchi yo\u02bcq</div>";
+  }).join('')||"<div style='font-size:13px;color:var(--c5)'>Ishchi yo\u02bcq</div>";
 }
 function renderIgAdm(){
   document.getElementById('igAdm').innerHTML=D.ig.map(ig=>{
@@ -96,8 +150,8 @@ function renderIgAdm(){
   <rect x="2" y="2" width="24" height="24" rx="6" fill="url(#ig_g)"/>
   <circle cx="12" cy="12" r="4.5" fill="none" stroke="#fff" stroke-width="1.8"/>
   <circle cx="17" cy="7" r="1.2" fill="#fff"/>
-</svg></div><div style="flex:1"><div style="font-size:14px;font-weight:700;color:#5b21b6">${ig.name}</div><div style="font-size:15px;color:#888">${sels.map(s=>s.name).join(', ')||'Sotuvchi biriktirilmagan'}</div></div><div style="font-size:13px;color:#888;white-space:nowrap">${tot} sotuv</div></div><div style="display:flex;gap:8px"><button class="btn" style="flex:1;padding:9px" onclick="openEditIg(${ig.id})">Nomini o\'zgartir</button><button class="btn btnd" style="flex:1;padding:9px" onclick="delIg(${ig.id})">O\'chirish</button></div></div>`;
-  }).join('')||'<div style="font-size:13px;color:#999">Instagram profil yo\'q</div>';
+</svg></div><div style="flex:1"><div style="font-size:14px;font-weight:700;color:#5b21b6">${ig.name}</div><div style="font-size:15px;color:var(--c4)">${sels.map(s=>s.name).join(', ')||'Sotuvchi biriktirilmagan'}</div></div><div style="font-size:13px;color:var(--c4);white-space:nowrap">${tot} sotuv</div></div><div style="display:flex;gap:8px"><button class="btn" style="flex:1;padding:9px" onclick="openEditIg(${ig.id})">Nomini o\'zgartir</button><button class="btn btnd" style="flex:1;padding:9px" onclick="delIg(${ig.id})">O\'chirish</button></div></div>`;
+  }).join('')||'<div style="font-size:13px;color:var(--c5)">Instagram profil yo\'q</div>';
 }
 
 // --- CRUD: IG ---
@@ -235,6 +289,10 @@ function setPayType(type){
   } else {
     cashBtn.style.borderColor='#16a34a';cashBtn.style.background='#F0FDF4';cashBtn.style.color='#16a34a';
     cardBtn.style.borderColor='#e5e7eb';cardBtn.style.background='white';cardBtn.style.color='#888';
+    const errEl=document.getElementById('confReceiptErr');
+    const areaEl=document.getElementById('receiptUploadArea');
+    if(errEl) errEl.style.display='none';
+    if(areaEl) areaEl.style.borderColor='#e5e7eb';
   }
 }
 function handleReceiptImg(inp){
@@ -254,6 +312,10 @@ function handleReceiptImg(inp){
       document.getElementById('receiptImg').src=D_receiptImg;
       document.getElementById('receiptPreview').style.display='block';
       document.getElementById('receiptPlaceholder').style.display='none';
+      const errEl=document.getElementById('confReceiptErr');
+      const areaEl=document.getElementById('receiptUploadArea');
+      if(errEl) errEl.style.display='none';
+      if(areaEl) areaEl.style.borderColor='#e5e7eb';
     };
     img.src=e.target.result;
   };
@@ -312,7 +374,47 @@ function removeImg(){D.imgD='';D.imgList=[];document.getElementById('imgF').valu
 // Legacy - eski kod uchun
 function handleImg(inp){handleImgMulti(inp);}
 function fillProdIg(selId){
-  document.getElementById('pIg').innerHTML=D.ig.map(ig=>`<option value="${ig.id}"${ig.id===selId?' selected':''}>${ig.name}</option>`).join('');
+  const firstId=selId!=null?selId:(D.ig.length?D.ig[0].id:null);
+  const hid=document.getElementById('pIgVal');
+  if(hid) hid.value=firstId!=null?firstId:'';
+  const btnText=document.getElementById('pIgBtnText');
+  if(btnText){
+    const sel=D.ig.find(ig=>ig.id==firstId);
+    btnText.textContent=sel?sel.name:'Tanlang';
+  }
+  const drop=document.getElementById('pIgDrop');
+  if(!drop) return;
+  drop.innerHTML=D.ig.map(ig=>{
+    const on=ig.id==firstId;
+    return`<div onclick="selectProdIg(${ig.id})" style="padding:10px 14px;font-size:14px;cursor:pointer;background:${on?'var(--pbg)':'transparent'};color:${on?'var(--p)':'var(--c1)'};font-weight:${on?'600':'400'};border-bottom:1px solid var(--bd);transition:background .15s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='${on?'var(--pbg)':'transparent'}'">${ig.name}</div>`;
+  }).join('');
+}
+function selectProdIg(id){
+  const hid=document.getElementById('pIgVal');
+  if(hid) hid.value=id;
+  const sel=D.ig.find(ig=>ig.id==id);
+  const btnText=document.getElementById('pIgBtnText');
+  if(btnText) btnText.textContent=sel?sel.name:'Tanlang';
+  const drop=document.getElementById('pIgDrop');
+  if(drop){
+    drop.style.display='none';
+    drop.querySelectorAll('div').forEach(d=>{
+      const on=d.getAttribute('onclick')==='selectProdIg('+id+')';
+      d.style.background=on?'var(--pbg)':'transparent';
+      d.style.color=on?'var(--p)':'var(--c1)';
+      d.style.fontWeight=on?'600':'400';
+    });
+  }
+}
+function toggleProdIgDrop(){
+  const drop=document.getElementById('pIgDrop');
+  if(!drop) return;
+  const open=drop.style.display==='none';
+  drop.style.display=open?'block':'none';
+  if(open){
+    const close=e=>{if(!document.getElementById('pIg').contains(e.target)){drop.style.display='none';document.removeEventListener('click',close);}};
+    setTimeout(()=>document.addEventListener('click',close),0);
+  }
 }
 function openAddProd(){
   D.ePid=null;D.imgD='';D.imgList=[];
@@ -363,12 +465,24 @@ async function migrateImagesToStorage(){
 }
 window.saveProd = async function(){
   const name=document.getElementById('pN').value.trim();
-  const price=parseInt(document.getElementById('pPr').value);
-  const cost=parseInt(document.getElementById('pCost').value)||0;
-  const stockVal=document.getElementById('pStock').value;
+  const price=Math.max(0,parseInt(document.getElementById('pPr').value)||0);
+  const costRaw=document.getElementById('pCost').value.trim();
+  const cost=Math.max(0,parseInt(costRaw)||0);
+  const stockVal=document.getElementById('pStock').value.trim();
   const stock=stockVal!==''?parseInt(stockVal):null;
-  const igId=parseInt(document.getElementById('pIg').value)||null;
-  if(!name||!price)return;
+  const igId=parseInt(document.getElementById('pIgVal').value)||null;
+  const errEl=document.getElementById('pErr');
+  const missing=[];
+  if(!name) missing.push('Mahsulot nomi');
+  if(!price) missing.push('Narx');
+  if(!costRaw) missing.push('Tannarx');
+  if(stockVal==='') missing.push('Boshlang\'ich soni');
+  if(!(D.imgList&&D.imgList.length)) missing.push('Rasm');
+  if(missing.length){
+    if(errEl){errEl.style.display='block';errEl.innerHTML='&#9888; To\'ldirilmagan: <b>'+missing.join(', ')+'</b>';}
+    return;
+  }
+  if(errEl) errEl.style.display='none';
 
   // Rasmlarni Storage ga yuklash
   const imgs=D.imgList||[];
@@ -455,13 +569,13 @@ function showProdImg(prodId){
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   const thumbs=imgs.length>1?'<div style="display:flex;gap:6px;padding:10px 16px;overflow-x:auto">'+imgs.map((url,i)=>'<img src="'+url+'" onclick="document.getElementById(\'_bigImg\').src=this.src" style="width:48px;height:48px;border-radius:8px;object-fit:cover;cursor:pointer;border:2px solid '+(i===0?'#185FA5':'#e5e7eb')+';flex-shrink:0">').join('')+'</div>':'';
-  ov.innerHTML='<div style="background:#fff;border-radius:20px;overflow:hidden;width:min(340px,90vw);box-shadow:0 24px 64px rgba(0,0,0,.4);position:relative">'
-    +'<div style="background:#f8f8f6;display:flex;align-items:center;justify-content:center;padding:16px;min-height:200px;position:relative">'
+  ov.innerHTML='<div style="background:var(--bg1);border-radius:20px;overflow:hidden;width:min(340px,90vw);box-shadow:0 24px 64px rgba(0,0,0,.4);position:relative">'
+    +'<div style="background:var(--bg3);display:flex;align-items:center;justify-content:center;padding:16px;min-height:200px;position:relative">'
     +'<img id="_bigImg" src="'+imgs[0]+'" style="max-width:100%;max-height:280px;object-fit:contain;display:block;border-radius:8px">'
       +'<button onclick="this.closest(\'#_imgOv\') && document.getElementById(\'_imgOv\').remove()" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;line-height:1">&#215;</button>'
     +'</div>'
     +thumbs
-    +'<div style="padding:14px 16px"><div style="font-size:15px;font-weight:700;color:#1a1a1a">'+p.name+'</div>'
+    +'<div style="padding:14px 16px"><div style="font-size:15px;font-weight:700;color:var(--c1)">'+p.name+'</div>'
     +'<div style="font-size:14px;color:#185FA5;font-weight:600;margin-top:4px">'+fmt(p.price)+' so\'m</div></div></div>';
   document.body.appendChild(ov);
 }
@@ -481,7 +595,7 @@ function renderTarixPage(page){
   const s=window._tarixSales||[];
   const el=document.getElementById('tarixW');
   if(!el) return;
-  if(!s.length){el.innerHTML='<div style="padding:14px;font-size:13px;color:#999">Sotuv topilmadi</div>';return;}
+  if(!s.length){el.innerHTML='<div style="padding:14px;font-size:13px;color:var(--c5)">Sotuv topilmadi</div>';return;}
   const total=s.length;
   const totalPages=Math.ceil(total/_PAGE_SIZE);
   const start=(_tarixPage-1)*_PAGE_SIZE;
@@ -495,17 +609,17 @@ function renderTarixPage(page){
     const total=x.total||items.reduce((a,it)=>a+(it.price||(gP(it.pid)?gP(it.pid).price:0))*it.qty,0);
     if(!isMulti){
       return`<div class="lr">`
-        +(si?`<img src="${si}" style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:#f8f8f6;flex-shrink:0">`:`<div class="dot" style="background:${p?p.color:'#ccc'}"></div>`)
-        +`<div style="flex:1"><div style="font-size:13px;font-weight:600">${p?p.name:'-'}</div><div style="font-size:12px;color:#888">${x.date} ${x.time||''}</div></div><span style="font-size:13px;font-weight:600">${fmt(total)} so'm</span></div>`;
+        +(si?`<img src="${si}" style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:var(--bg3);flex-shrink:0">`:`<div class="dot" style="background:${p?p.color:'#ccc'}"></div>`)
+        +`<div style="flex:1"><div style="font-size:13px;font-weight:600">${p?p.name:'-'}</div><div style="font-size:12px;color:var(--c4)">${x.date} ${x.time||''}</div></div><span style="font-size:13px;font-weight:600">${fmt(total)} so'm</span></div>`;
     }
     const summary=items.map(it=>{const ip=gP(it.pid);return(ip?ip.name:'-')+(it.qty>1?' \xd7'+it.qty:'');}).join(' + ');
     const previewImgs=items.filter(it=>it.selectedImg).slice(0,3);
-    return`<div style="padding:10px 14px;border-bottom:0.5px solid #f5f5f3;display:flex;align-items:center;gap:10px">`
+    return`<div style="padding:10px 14px;border-bottom:0.5px solid var(--bg4);display:flex;align-items:center;gap:10px">`
       +`<div style="display:flex;gap:3px;flex-shrink:0">`
-      +previewImgs.map(it=>`<img src="${it.selectedImg}" style="width:30px;height:30px;border-radius:6px;object-fit:contain;background:#f8f8f6">`).join('')
+      +previewImgs.map(it=>`<img src="${it.selectedImg}" style="width:30px;height:30px;border-radius:6px;object-fit:contain;background:var(--bg3)">`).join('')
       +(items.length>previewImgs.length?`<div style="width:30px;height:30px;border-radius:6px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#185FA5">+${items.length-previewImgs.length}</div>`:'')
       +`</div>`
-      +`<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${summary}</div><div style="font-size:11px;color:#888">${x.date} ${x.time||''}</div></div>`
+      +`<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${summary}</div><div style="font-size:11px;color:var(--c4)">${x.date} ${x.time||''}</div></div>`
       +`<span style="font-size:13px;font-weight:700;color:#185FA5;flex-shrink:0">${fmt(total)} so'm</span>`
       +`</div>`;
   }).join('');
@@ -515,17 +629,17 @@ function renderTarixPage(page){
     let btns='';
     for(let i=1;i<=totalPages;i++){
       const isOn=i===_tarixPage;
-      btns+=`<button onclick="renderTarixPage(${i})" style="min-width:34px;height:34px;border-radius:8px;border:${isOn?'2px solid #185FA5':'1px solid #e5e7eb'};background:${isOn?'#EFF6FF':'white'};color:${isOn?'#185FA5':'#555'};font-size:14px;font-weight:${isOn?'700':'400'};cursor:pointer;font-family:inherit">${i}</button>`;
+      btns+=`<button onclick="renderTarixPage(${i})" style="min-width:34px;height:34px;border-radius:8px;border:${isOn?'2px solid var(--p)':'1px solid var(--bd)'};background:${isOn?'var(--pbg)':'var(--bg1)'};color:${isOn?'var(--p)':'var(--c2)'};font-size:14px;font-weight:${isOn?'700':'400'};cursor:pointer;font-family:inherit">${i}</button>`;
     }
-    paginHtml=`<div style="padding:12px 14px;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;border-top:1px solid #f0f0ec">
-      <button onclick="renderTarixPage(${Math.max(1,_tarixPage-1)})" ${_tarixPage===1?'disabled':''}  style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;font-family:inherit;opacity:${_tarixPage===1?'.4':'1'}">&#8249;</button>
+    paginHtml=`<div style="padding:12px 14px;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;border-top:1px solid var(--bg5)">
+      <button onclick="renderTarixPage(${Math.max(1,_tarixPage-1)})" ${_tarixPage===1?'disabled':''}  style="min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);color:var(--c2);font-size:16px;cursor:pointer;font-family:inherit;opacity:${_tarixPage===1?'.4':'1'}">&#8249;</button>
       ${btns}
-      <button onclick="renderTarixPage(${Math.min(totalPages,_tarixPage+1)})" ${_tarixPage===totalPages?'disabled':''} style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;font-family:inherit;opacity:${_tarixPage===totalPages?'.4':'1'}">&#8250;</button>
+      <button onclick="renderTarixPage(${Math.min(totalPages,_tarixPage+1)})" ${_tarixPage===totalPages?'disabled':''} style="min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);color:var(--c2);font-size:16px;cursor:pointer;font-family:inherit;opacity:${_tarixPage===totalPages?'.4':'1'}">&#8250;</button>
     </div>`;
   }
 
   el.innerHTML=`
-    <div style="padding:8px 14px;font-size:13px;font-weight:700;color:#999;border-bottom:1px solid #f0f0ec">
+    <div style="padding:8px 14px;font-size:13px;font-weight:700;color:var(--c5);border-bottom:1px solid var(--bg5)">
       ${start+1}–${Math.min(start+_PAGE_SIZE,total)} / ${total} ta sotuv
     </div>
     ${detailHtml}
@@ -538,7 +652,7 @@ function renderSalesList(filtered, page){
   _salesPage=page||1;
   window._filteredSales=filtered;
   const el=document.getElementById('todayAll');
-  if(!filtered.length){el.innerHTML='<div style="padding:14px;font-size:14px;color:#999">Bu davrda sotuv yo\'q</div>';return;}
+  if(!filtered.length){el.innerHTML='<div style="padding:14px;font-size:14px;color:var(--c5)">Bu davrda sotuv yo\'q</div>';return;}
 
   // Group by product
   const grouped={};
@@ -575,17 +689,17 @@ function renderSalesList(filtered, page){
     const meta=`${sel?sel.name:'<i style="color:#bbb">O\'chirilgan</i>'} ${ig?'· '+ig.name:''} · ${s.date} ${s.time}`;
     if(!isMulti){
       return`<div class="lr">`
-        +(si?`<img src="${si}" style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:#f8f8f6;flex-shrink:0">`:`<div class="dot" style="background:${p?p.color:'#ccc'}"></div>`)
-        +`<div style="flex:1"><div style="font-size:14px">${p?p.name:'-'}</div><div style="font-size:13px;color:#888">${meta}</div></div><span style="font-size:14px;font-weight:600">${fmt(total)} so'm</span></div>`;
+        +(si?`<img src="${si}" style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:var(--bg3);flex-shrink:0">`:`<div class="dot" style="background:${p?p.color:'#ccc'}"></div>`)
+        +`<div style="flex:1"><div style="font-size:14px">${p?p.name:'-'}</div><div style="font-size:13px;color:var(--c4)">${meta}</div></div><span style="font-size:14px;font-weight:600">${fmt(total)} so'm</span></div>`;
     }
     const summary=items.map(it=>{const ip=gP(it.pid);return(ip?ip.name:'-')+(it.qty>1?' \xd7'+it.qty:'');}).join(' + ');
     const previewImgs=items.filter(it=>it.selectedImg).slice(0,2);
-    return`<div style="padding:10px 14px;border-bottom:0.5px solid #f5f5f3;display:flex;align-items:center;gap:10px">`
+    return`<div style="padding:10px 14px;border-bottom:0.5px solid var(--bg4);display:flex;align-items:center;gap:10px">`
       +`<div style="display:flex;gap:3px;flex-shrink:0">`
-      +previewImgs.map(it=>`<img src="${it.selectedImg}" style="width:32px;height:32px;border-radius:6px;object-fit:contain;background:#f8f8f6">`).join('')
+      +previewImgs.map(it=>`<img src="${it.selectedImg}" style="width:32px;height:32px;border-radius:6px;object-fit:contain;background:var(--bg3)">`).join('')
       +(items.length>previewImgs.length?`<div style="width:32px;height:32px;border-radius:6px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#185FA5">+${items.length-previewImgs.length}</div>`:'')
       +`</div>`
-      +`<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${summary}</div><div style="font-size:12px;color:#888">${meta}</div></div>`
+      +`<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${summary}</div><div style="font-size:12px;color:var(--c4)">${meta}</div></div>`
       +`<span style="font-size:14px;font-weight:700;color:#185FA5;flex-shrink:0">${fmt(total)} so'm</span>`
       +`</div>`;
   }).join('');
@@ -596,12 +710,12 @@ function renderSalesList(filtered, page){
     let btns='';
     for(let i=1;i<=totalPages;i++){
       const isOn=i===_salesPage;
-      btns+=`<button onclick="renderSalesList(window._filteredSales,${i})" style="min-width:34px;height:34px;border-radius:8px;border:${isOn?'2px solid #185FA5':'1px solid #e5e7eb'};background:${isOn?'#EFF6FF':'white'};color:${isOn?'#185FA5':'#555'};font-size:14px;font-weight:${isOn?'700':'400'};cursor:pointer;font-family:inherit">${i}</button>`;
+      btns+=`<button onclick="renderSalesList(window._filteredSales,${i})" style="min-width:34px;height:34px;border-radius:8px;border:${isOn?'2px solid var(--p)':'1px solid var(--bd)'};background:${isOn?'var(--pbg)':'var(--bg1)'};color:${isOn?'var(--p)':'var(--c2)'};font-size:14px;font-weight:${isOn?'700':'400'};cursor:pointer;font-family:inherit">${i}</button>`;
     }
-    paginHtml=`<div style="padding:12px 14px;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;border-top:1px solid #f0f0ec">
-      <button onclick="renderSalesList(window._filteredSales,${Math.max(1,_salesPage-1)})" style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;font-family:inherit" ${_salesPage===1?'disabled style="opacity:.4;cursor:default;min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;"':''}>‹</button>
+    paginHtml=`<div style="padding:12px 14px;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;border-top:1px solid var(--bg5)">
+      <button onclick="renderSalesList(window._filteredSales,${Math.max(1,_salesPage-1)})" style="min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);color:var(--c2);font-size:16px;cursor:pointer;font-family:inherit" ${_salesPage===1?'disabled style="opacity:.4;cursor:default;min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);"':''}>‹</button>
       ${btns}
-      <button onclick="renderSalesList(window._filteredSales,${Math.min(totalPages,_salesPage+1)})" style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;font-family:inherit" ${_salesPage===totalPages?'disabled style="opacity:.4;cursor:default;min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;"':''}>›</button>
+      <button onclick="renderSalesList(window._filteredSales,${Math.min(totalPages,_salesPage+1)})" style="min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);color:var(--c2);font-size:16px;cursor:pointer;font-family:inherit" ${_salesPage===totalPages?'disabled style="opacity:.4;cursor:default;min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);"':''}>›</button>
     </div>`;
   }
 
@@ -610,8 +724,8 @@ function renderSalesList(filtered, page){
       <div style="padding:8px 14px;font-size:13px;font-weight:700;color:#1e40af;border-bottom:1px solid #DBEAFE">Mahsulot bo'yicha xulosa</div>
       ${summaryHtml}
     </div>
-    <div style="margin-top:10px;border-top:1px solid #f0f0ec">
-      <div style="padding:8px 14px;font-size:13px;font-weight:700;color:#999">Batafsil sotuvlar ro'yxati (${start+1}–${Math.min(start+_PAGE_SIZE,sorted.length)} / ${sorted.length})</div>
+    <div style="margin-top:10px;border-top:1px solid var(--bg5)">
+      <div style="padding:8px 14px;font-size:13px;font-weight:700;color:var(--c5)">Batafsil sotuvlar ro'yxati (${start+1}–${Math.min(start+_PAGE_SIZE,sorted.length)} / ${sorted.length})</div>
       ${detailHtml}
     </div>
     ${paginHtml}`;

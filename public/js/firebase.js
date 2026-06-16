@@ -1,5 +1,5 @@
 ﻿    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -24,6 +24,7 @@
       settings: 'settings',
       tasks: 'tasks',
       announcements: 'announcements',
+      attendance: 'attendance',
       biz_kpi: 'biz_kpi',
       biz_plans: 'biz_plans',
       biz_decisions: 'biz_decisions'
@@ -33,7 +34,7 @@
     async function loadAllData() {
       showLoader(true);
       try {
-        const [sellersSnap, igSnap, prodsSnap, salesSnap, settingsSnap, tasksSnap, annsSnap, bizKpiSnap, bizPlansSnap, bizDecsSnap] = await Promise.all([
+        const [sellersSnap, igSnap, prodsSnap, salesSnap, settingsSnap, tasksSnap, annsSnap, bizKpiSnap, bizPlansSnap, bizDecsSnap, attSnap] = await Promise.all([
           getDocs(collection(db, COLS.sellers)),
           getDocs(collection(db, COLS.ig)),
           getDocs(collection(db, COLS.products)),
@@ -43,7 +44,8 @@
           getDocs(collection(db, COLS.announcements)),
           getDocs(collection(db, COLS.biz_kpi)),
           getDocs(collection(db, COLS.biz_plans)),
-          getDocs(collection(db, COLS.biz_decisions))
+          getDocs(collection(db, COLS.biz_decisions)),
+          getDocs(query(collection(db, COLS.attendance), where('date','==',today())))
         ]);
 
         // Sellers
@@ -121,6 +123,7 @@
         if (!bizKpiSnap.empty) D.bizKpi = bizKpiSnap.docs.map(d=>({...d.data(),_id:d.id}));
         if (!bizPlansSnap.empty) D.bizPlans = bizPlansSnap.docs.map(d=>({...d.data(),_id:d.id}));
         if (!bizDecsSnap.empty) D.bizDecisions = bizDecsSnap.docs.map(d=>({...d.data(),_id:d.id}));
+        if (!attSnap.empty) D.attendance = attSnap.docs.map(d=>({...d.data(),_id:d.id}));
 
         // If empty DB - save initial data
         if (sellersSnap.empty) await saveInitialData();
@@ -363,6 +366,20 @@ window.addEventListener('resize',function(){
       },
       async deleteBizDecision(id) {
         try { await deleteDoc(doc(db, COLS.biz_decisions, id)); } catch(e) { console.error(e); }
+      },
+      // Davomat saqlash
+      async saveAttendance(record) {
+        try {
+          const r = await addDoc(collection(db, COLS.attendance), record);
+          record._id = r.id;
+        } catch(e) { console.error(e); }
+      },
+      // Sana bo'yicha davomat yuklash
+      async loadAttendanceByDate(date) {
+        try {
+          const snap = await getDocs(query(collection(db, COLS.attendance), where('date','==',date)));
+          return snap.docs.map(d=>({...d.data(),_id:d.id}));
+        } catch(e) { console.error(e); return []; }
       },
       // Barcha sotuvlarni o'chirish (test tozalash)
       async clearSales() {

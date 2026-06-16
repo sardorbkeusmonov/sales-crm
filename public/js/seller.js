@@ -105,18 +105,18 @@ function renderDash(){
   });
   const mx2=Math.max(...igSt.map(x=>x.cnt),1);
   document.getElementById('igDay').innerHTML=igSt.map((x,idx)=>`
-    <div style="padding:12px 14px;${idx<igSt.length-1?'border-bottom:1px solid #f0f0ec':''}">
+    <div style="padding:12px 14px;${idx<igSt.length-1?'border-bottom:1px solid var(--bg5)':''}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div><div style="font-size:14px;font-weight:700;color:#5b21b6">${x.ig.name}</div>
-        <div style="font-size:14px;color:#999;margin-top:2px">${x.sels.length?x.sels.map(s=>s.name).join(', '):'Sotuvchi biriktirilmagan'}</div></div>
-        <div style="text-align:right"><div style="font-size:18px;font-weight:700">${x.cnt} ta</div><div style="font-size:15px;color:#888">${fmt(x.r)} so'm</div></div>
+        <div style="font-size:14px;color:var(--c5);margin-top:2px">${x.sels.length?x.sels.map(s=>s.name).join(', '):'Sotuvchi biriktirilmagan'}</div></div>
+        <div style="text-align:right"><div style="font-size:18px;font-weight:700">${x.cnt} ta</div><div style="font-size:15px;color:var(--c4)">${fmt(x.r)} so'm</div></div>
       </div>
       <div class="rb"><div class="rf" style="width:${mx2>0?Math.round(x.cnt/mx2*100):0}%;background:#CECBF6"></div></div>
     </div>`).join('');
   const pc={};filtered.forEach(s=>{pc[s.pid]=(pc[s.pid]||0)+1;});
   const sp=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,4);
   const mx3=sp.length?sp[0][1]:1;
-  document.getElementById('topP').innerHTML=sp.length?sp.map(([pid,cnt])=>{const p=gP(+pid);if(!p)return'';return`<div class="lr"><div class="dot" style="background:${p.color}"></div><span style="flex:1;font-size:13px">${p.name}</span><div class="rb" style="width:80px"><div class="rf" style="width:${Math.round(cnt/mx3*100)}%;background:${p.color}"></div></div><span style="font-size:13px;font-weight:600;margin-left:8px">${cnt}</span></div>`}).join(''):'<div style="padding:14px;font-size:13px;color:#999">Hali sotuv yo\'q</div>';
+  document.getElementById('topP').innerHTML=sp.length?sp.map(([pid,cnt])=>{const p=gP(+pid);if(!p)return'';return`<div class="lr"><div class="dot" style="background:${p.color}"></div><span style="flex:1;font-size:13px">${p.name}</span><div class="rb" style="width:80px"><div class="rf" style="width:${Math.round(cnt/mx3*100)}%;background:${p.color}"></div></div><span style="font-size:13px;font-weight:600;margin-left:8px">${cnt}</span></div>`}).join(''):'<div style="padding:14px;font-size:13px;color:var(--c5)">Hali sotuv yo\'q</div>';
   renderSalesList(filtered, false);
 }
 
@@ -133,14 +133,14 @@ function renderJamoa(){
   const srtdIg=[...igSt].sort((a,b)=>b.today-a.today||b.month-a.month);const mxI=Math.max(...srtdIg.map(s=>s.today),1);
   document.getElementById('jS').innerHTML=`
     <div class="sg" style="margin-bottom:12px">
-      <div class="st"><div class="sl">Bugungi sotuv</div><div class="sv">${sStats.reduce((a,s)=>a+s.today,0)}<span style="font-size:14px;font-weight:400;color:#999;margin-left:3px">ta</span></div></div>
-      <div class="st"><div class="sl">Oylik sotuv</div><div class="sv">${sStats.reduce((a,s)=>a+s.month,0)}<span style="font-size:14px;font-weight:400;color:#999;margin-left:3px">ta</span></div><div class="ss">${curMon}</div></div>
+      <div class="st"><div class="sl">Bugungi sotuv</div><div class="sv">${sStats.reduce((a,s)=>a+s.today,0)}<span style="font-size:14px;font-weight:400;color:var(--c5);margin-left:3px">ta</span></div></div>
+      <div class="st"><div class="sl">Oylik sotuv</div><div class="sv">${sStats.reduce((a,s)=>a+s.month,0)}<span style="font-size:14px;font-weight:400;color:var(--c5);margin-left:3px">ta</span></div><div class="ss">${curMon}</div></div>
     </div>
     ${srtd.map((s,i)=>{
       const isTop=i===0&&s.today>0;
       const pct=mx>0?Math.round(s.today/mx*100):0;
-      const medal=i===0?'<span style="font-size:22px">&#127942;</span>':i===1?'<span style="font-size:22px">&#129352;</span>':i===2?'<span style="font-size:22px">&#129353;</span>':`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#f0f0ec;color:#888;font-size:12px;font-weight:700">${i+1}</span>`;
-      return`<div style="background:#fff;border:1px solid #eee;border-radius:12px;padding:14px;margin-bottom:8px">
+      const medal=i===0?'<span style="font-size:22px">&#127942;</span>':i===1?'<span style="font-size:22px">&#129352;</span>':i===2?'<span style="font-size:22px">&#129353;</span>':`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--bg5);color:var(--c4);font-size:12px;font-weight:700">${i+1}</span>`;
+      return`<div style="background:var(--bg1);border:1px solid var(--bd3);border-radius:12px;padding:14px;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:${s.today>0?10:0}px">
           <div style="width:28px;text-align:center;font-size:18px">${medal}</div>
           <div class="av" style="${avSt(s.sel.ai||0)}">${ini(s.sel.name)}</div>
@@ -152,27 +152,27 @@ function renderJamoa(){
             <div style="font-size:14px;color:#5b21b6;margin-top:1px">${gI(s.sel.igId)?gI(s.sel.igId).name:''}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:26px;font-weight:700;color:${isTop?'#f59e0b':'#1a1a1a'}">${s.today}<span style="font-size:13px;font-weight:400;color:#999;margin-left:2px">ta</span></div>
-            <div style="font-size:14px;color:#888;margin-top:2px">bu oy: ${s.month} ta</div>
+            <div style="font-size:26px;font-weight:700;color:${isTop?'#f59e0b':'#1a1a1a'}">${s.today}<span style="font-size:13px;font-weight:400;color:var(--c5);margin-left:2px">ta</span></div>
+            <div style="font-size:14px;color:var(--c4);margin-top:2px">bu oy: ${s.month} ta</div>
           </div>
         </div>
-        ${s.today>0?`<div style="background:#f0f0ec;border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:${isTop?'#f59e0b':'#93C5FD'};width:${pct}%"></div></div>`:''}
+        ${s.today>0?`<div style="background:var(--bg5);border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:${isTop?'#f59e0b':'#93C5FD'};width:${pct}%"></div></div>`:''}
       </div>`;
     }).join('')}
   `;
   document.getElementById('jI').innerHTML=`
     <div class="sg" style="margin-bottom:12px">
-      <div class="st"><div class="sl">Bugungi sotuv</div><div class="sv">${igSt.reduce((a,s)=>a+s.today,0)}<span style="font-size:14px;font-weight:400;color:#999;margin-left:3px">ta</span></div></div>
-      <div class="st"><div class="sl">Oylik sotuv</div><div class="sv">${igSt.reduce((a,s)=>a+s.month,0)}<span style="font-size:14px;font-weight:400;color:#999;margin-left:3px">ta</span></div><div class="ss">${curMon}</div></div>
+      <div class="st"><div class="sl">Bugungi sotuv</div><div class="sv">${igSt.reduce((a,s)=>a+s.today,0)}<span style="font-size:14px;font-weight:400;color:var(--c5);margin-left:3px">ta</span></div></div>
+      <div class="st"><div class="sl">Oylik sotuv</div><div class="sv">${igSt.reduce((a,s)=>a+s.month,0)}<span style="font-size:14px;font-weight:400;color:var(--c5);margin-left:3px">ta</span></div><div class="ss">${curMon}</div></div>
     </div>
     <div class="card"><div class="ch">Instagram profil reytingi</div>${srtdIg.map((s,i)=>{
       const isTop=i===0&&s.today>0;
       const pct=mxI>0?Math.round(s.today/mxI*100):0;
-      const medal=i===0?'<span style="font-size:22px">&#127942;</span>':i===1?'<span style="font-size:22px">&#129352;</span>':i===2?'<span style="font-size:22px">&#129353;</span>':`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#f0f0ec;color:#888;font-size:12px;font-weight:700">${i+1}</span>`;
-      return`<div style="background:#fff;border:1px solid #eee;border-radius:12px;padding:14px;margin:0 14px 8px">
+      const medal=i===0?'<span style="font-size:22px">&#127942;</span>':i===1?'<span style="font-size:22px">&#129352;</span>':i===2?'<span style="font-size:22px">&#129353;</span>':`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--bg5);color:var(--c4);font-size:12px;font-weight:700">${i+1}</span>`;
+      return`<div style="background:var(--bg1);border:1px solid var(--bd3);border-radius:12px;padding:14px;margin:0 14px 8px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:${s.today>0?10:0}px">
           <div style="width:28px;text-align:center;font-size:18px">${medal}</div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="ig_g" x1="0%" y1="100%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#FFDC80"/>
@@ -191,19 +191,104 @@ function renderJamoa(){
               <span style="font-size:14px;font-weight:700;color:#5b21b6">${s.ig.name}</span>
               ${isTop?'<span style="background:#FEF3C7;color:#92400e;font-size:13px;padding:2px 7px;border-radius:10px;font-weight:600">Lider</span>':''}
             </div>
-            <div style="font-size:14px;color:#888;margin-top:1px">${s.igSels.map(x=>x.name).join(', ')||'-'}</div>
+            <div style="font-size:14px;color:var(--c4);margin-top:1px">${s.igSels.map(x=>x.name).join(', ')||'-'}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:26px;font-weight:700;color:${isTop?'#f59e0b':'#1a1a1a'}">${s.today}<span style="font-size:13px;font-weight:400;color:#999;margin-left:2px">ta</span></div>
-            <div style="font-size:14px;color:#888;margin-top:2px">bu oy: ${s.month} ta</div>
+            <div style="font-size:26px;font-weight:700;color:${isTop?'#f59e0b':'#1a1a1a'}">${s.today}<span style="font-size:13px;font-weight:400;color:var(--c5);margin-left:2px">ta</span></div>
+            <div style="font-size:14px;color:var(--c4);margin-top:2px">bu oy: ${s.month} ta</div>
           </div>
         </div>
-        ${s.today>0?`<div style="background:#f0f0ec;border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:${isTop?'#f59e0b':'#CECBF6'};width:${pct}%"></div></div>`:''}
+        ${s.today>0?`<div style="background:var(--bg5);border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:${isTop?'#f59e0b':'#CECBF6'};width:${pct}%"></div></div>`:''}
       </div>`;
     }).join('')}</div>`;
 }
 function jView(v,el){document.querySelectorAll('#jSeg .sb').forEach(b=>b.classList.remove('on'));if(el)el.classList.add('on');document.getElementById('jS').style.display=v==='s'?'block':'none';document.getElementById('jI').style.display=v==='i'?'block':'none';}
-function sView(v,el){document.querySelectorAll('#sSeg .sb').forEach(b=>b.classList.remove('on'));if(el)el.classList.add('on');document.getElementById('sViewSellers').style.display=v==='sellers'?'block':'none';document.getElementById('sViewInstagram').style.display=v==='instagram'?'block':'none';}
+function sView(v,el){
+  document.querySelectorAll('#sSeg .sb').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.getElementById('sViewSellers').style.display=v==='sellers'?'block':'none';
+  document.getElementById('sViewInstagram').style.display=v==='instagram'?'block':'none';
+  document.getElementById('sViewDavomat').style.display=v==='davomat'?'block':'none';
+  if(v==='davomat') renderDavomat();
+}
+
+// ===== DAVOMAT (SELLER SIDE) =====
+function renderSellerProf(){
+  const el=document.getElementById('sellerProfContent');
+  if(!el) return;
+  const uid=D.user?D.user.id:null;
+  const td=today();
+  const att=(D.attendance||[]).filter(a=>String(a.sellerId)===String(uid)&&a.date===td);
+  const keldi=att.find(a=>a.type==='keldi');
+  const ketdi=att.find(a=>a.type==='ketdi');
+  const sel=D.user||{};
+  const av=`<div class="av" style="${avSt(sel.ai||0)};width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0">${ini(sel.name||'?')}</div>`;
+  const photoCard=(rec,label)=>rec&&rec.photoUrl?`<div style="margin-top:8px"><img src="${rec.photoUrl}" style="width:100%;max-width:260px;border-radius:12px;display:block" onerror="this.style.display='none'"><div style="font-size:12px;color:var(--c4);margin-top:4px">${label}: ${rec.time}</div></div>`
+    :rec?`<div style="font-size:13px;color:#16a34a;margin-top:6px">&#10003; ${label}: ${rec.time}</div>`:'';
+  let actionHtml='';
+  if(!keldi){
+    actionHtml=`<button onclick="openAttCam('keldi')" style="width:100%;padding:16px;background:#185FA5;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px">&#128247; Keldim</button>`;
+  } else if(!ketdi){
+    actionHtml=`<div style="background:#DCFCE7;color:#16a34a;padding:10px 14px;border-radius:10px;font-size:14px;font-weight:700;margin-top:8px">&#10003; Keldingiz: ${keldi.time}</div>
+    ${keldi.photoUrl?`<img src="${keldi.photoUrl}" style="width:100%;max-width:260px;border-radius:12px;margin-top:8px;display:block" onerror="this.style.display='none'">`:'' }
+    <button onclick="openAttCam('ketdi')" style="width:100%;padding:14px;background:#dc2626;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px">&#128247; Ketdim</button>`;
+  } else {
+    actionHtml=`<div style="background:#DCFCE7;color:#16a34a;padding:10px 14px;border-radius:10px;font-size:14px;font-weight:700;margin-top:8px">&#10003; Keldingiz: ${keldi.time}</div>
+    ${keldi.photoUrl?`<img src="${keldi.photoUrl}" style="width:100%;max-width:260px;border-radius:12px;margin-top:8px;display:block" onerror="this.style.display='none'">`:'' }
+    <div style="background:#FEF2F2;color:#dc2626;padding:10px 14px;border-radius:10px;font-size:14px;font-weight:700;margin-top:8px">&#10003; Ketdingiz: ${ketdi.time}</div>
+    ${ketdi.photoUrl?`<img src="${ketdi.photoUrl}" style="width:100%;max-width:260px;border-radius:12px;margin-top:8px;display:block" onerror="this.style.display='none'">`:'' }`;
+  }
+  el.innerHTML=`
+    <div class="sc-card" style="margin-top:8px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        ${av}
+        <div>
+          <div style="font-size:18px;font-weight:700;color:var(--c1)">${sel.name||''}</div>
+          <div style="font-size:14px;color:var(--c4);margin-top:2px">${sel.role==='sotuvchi'?'Sotuvchi':sel.role||''}</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--bd);padding-top:14px">
+        <div style="font-size:14px;font-weight:700;color:var(--c1);margin-bottom:8px">&#128197; Bugungi davomat — ${td}</div>
+        ${actionHtml}
+      </div>
+    </div>`;
+}
+
+let _attType=null;
+function openAttCam(type){
+  _attType=type;
+  const inp=document.getElementById('attCamInput');
+  if(inp){inp.value='';inp.click();}
+}
+async function handleAttPhoto(input){
+  const file=input.files[0];
+  if(!file||!_attType) return;
+  const uid=D.user?D.user.id:null;
+  if(!uid) return;
+  const td=today();
+  const att=(D.attendance||[]).filter(a=>String(a.sellerId)===String(uid)&&a.date===td);
+  if(_attType==='keldi'&&att.find(a=>a.type==='keldi')){showToast('Bugun allaqachon kelganingiz qayd etilgan');return;}
+  if(_attType==='ketdi'&&att.find(a=>a.type==='ketdi')){showToast('Bugun allaqachon ketganingiz qayd etilgan');return;}
+  if(_attType==='ketdi'&&!att.find(a=>a.type==='keldi')){showToast("Avval 'Keldim' bosing");return;}
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    const base64=e.target.result;
+    const now=new Date();
+    const time=now.toTimeString().slice(0,5);
+    const path=`attendance/${td}_${uid}_${_attType}_${Date.now()}.jpg`;
+    showLoader(true);
+    try{
+      const url=await window.FS.uploadImage(base64,path);
+      const record={sellerId:uid,sellerName:D.user.name||'',type:_attType,date:td,time,photoUrl:url||'',timestamp:now.toISOString()};
+      await window.FS.saveAttendance(record);
+      D.attendance.push(record);
+      renderSellerProf();
+      showToast(_attType==='keldi'?'Kelish qayd etildi ✓':'Ketish qayd etildi ✓');
+    }catch(ex){showToast('Xatolik: '+ex.message);}
+    showLoader(false);
+  };
+  reader.readAsDataURL(file);
+}
 
 // --- MY JAMOA ---
 function renderMyJ(){
@@ -255,13 +340,13 @@ function renderMyJ(){
     })()}
     </div>
     <!-- Reyting -->
-    <div style="font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:10px">&#127942; Sotuvchilar reytingi</div>
+    <div style="font-size:13px;font-weight:700;color:var(--c1);margin-bottom:10px">&#127942; Sotuvchilar reytingi</div>
     ${srtd.map((s,i)=>{
       const isTop=i===0&&s.today>0;
       const isMyRow=isMe(s.sel.id);
       const pct=Math.round(s.today/mx*100);
-      const medal=i===0?'<span style="font-size:22px">&#127942;</span>':i===1?'<span style="font-size:22px">&#129352;</span>':i===2?'<span style="font-size:22px">&#129353;</span>':`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#f0f0ec;color:#888;font-size:12px;font-weight:700">${i+1}</span>`;
-      return`<div style="background:${isMyRow?'#EFF6FF':'#fff'};border:${isMyRow?'1.5px solid #185FA5':'1px solid #eee'};border-radius:12px;padding:14px;margin-bottom:8px">
+      const medal=i===0?'<span style="font-size:22px">&#127942;</span>':i===1?'<span style="font-size:22px">&#129352;</span>':i===2?'<span style="font-size:22px">&#129353;</span>':`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--bg5);color:var(--c4);font-size:12px;font-weight:700">${i+1}</span>`;
+      return`<div style="background:${isMyRow?'var(--pbg)':'var(--bg1)'};border:${isMyRow?'1.5px solid var(--p)':'1px solid var(--bd3)'};border-radius:12px;padding:14px;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:${s.total>0?10:0}px">
           <div style="width:28px;text-align:center;font-size:18px">${medal}</div>
           <div class="av" style="${avSt(s.sel.ai||0)}">${ini(s.sel.name)}</div>
@@ -274,24 +359,24 @@ function renderMyJ(){
             <div style="font-size:14px;color:#5b21b6;margin-top:1px">${gI(s.sel.igId)?gI(s.sel.igId).name:''}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:26px;font-weight:700;color:${isTop?'#f59e0b':isMyRow?'#185FA5':'#1a1a1a'}">${s.today}<span style="font-size:13px;font-weight:400;color:#999;margin-left:2px">ta</span></div>
-            <div style="font-size:14px;color:#888;margin-top:2px">bu oy: ${s.month} ta</div>
+            <div style="font-size:26px;font-weight:700;color:${isTop?'#f59e0b':isMyRow?'#185FA5':'#1a1a1a'}">${s.today}<span style="font-size:13px;font-weight:400;color:var(--c5);margin-left:2px">ta</span></div>
+            <div style="font-size:14px;color:var(--c4);margin-top:2px">bu oy: ${s.month} ta</div>
           </div>
         </div>
-        ${s.total>0?`<div style="background:#f0f0ec;border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:${isMyRow?'#185FA5':isTop?'#f59e0b':'#93C5FD'};width:${pct}%"></div></div>`:''}
+        ${s.total>0?`<div style="background:var(--bg5);border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:${isMyRow?'#185FA5':isTop?'#f59e0b':'#93C5FD'};width:${pct}%"></div></div>`:''}
       </div>`;
     }).join('')}
   `;
 
   document.getElementById('mjI').innerHTML=`
-    <div style="font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:10px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e1306c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Instagram profil reytingi</span></div>
+    <div style="font-size:13px;font-weight:700;color:var(--c1);margin-bottom:10px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e1306c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Instagram profil reytingi</span></div>
     ${igStats.map((s,i)=>{
       const myIg=D.user.igId===s.ig.id;
       const pct=Math.round(s.total/mxI*100);
-      return`<div style="background:${myIg?'#EFF6FF':'#fff'};border:${myIg?'1.5px solid #185FA5':'1px solid #eee'};border-radius:12px;padding:14px;margin-bottom:8px">
+      return`<div style="background:${myIg?'var(--pbg)':'var(--bg1)'};border:${myIg?'1.5px solid var(--p)':'1px solid var(--bd3)'};border-radius:12px;padding:14px;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:${s.total>0?10:0}px">
           <div style="width:28px;text-align:center;font-size:16px">${i===0?'&#127942;':i===1?'&#129352;':i===2?'&#129353;':i+1}</div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="ig_g" x1="0%" y1="100%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#FFDC80"/>
@@ -307,14 +392,14 @@ function renderMyJ(){
 </svg></div>
           <div style="flex:1">
             <div style="font-size:14px;font-weight:700;color:#5b21b6">${s.ig.name}${myIg?' <span style="background:#DBEAFE;color:#1e40af;font-size:13px;padding:2px 7px;border-radius:10px;font-weight:600">Mening</span>':''}</div>
-            <div style="font-size:14px;color:#888;margin-top:1px">${s.igSels.map(x=>x.name).join(', ')||'-'}</div>
+            <div style="font-size:14px;color:var(--c4);margin-top:1px">${s.igSels.map(x=>x.name).join(', ')||'-'}</div>
           </div>
           <div style="text-align:right">
             <div style="font-size:20px;font-weight:700">${s.total}</div>
-            <div style="font-size:14px;color:#888">bugun: ${s.today} ta</div>
+            <div style="font-size:14px;color:var(--c4)">bugun: ${s.today} ta</div>
           </div>
         </div>
-        ${s.total>0?`<div style="background:#f0f0ec;border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:${myIg?'#185FA5':'#CECBF6'};width:${pct}%"></div></div>`:''}
+        ${s.total>0?`<div style="background:var(--bg5);border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:${myIg?'#185FA5':'#CECBF6'};width:${pct}%"></div></div>`:''}
       </div>`;
     }).join('')}
   `;
@@ -333,7 +418,7 @@ function renderMyD(){
     return `
     <div class="st" style="border-left:3px solid #185FA5;padding-left:11px">
       <div class="sl" style="color:#185FA5">Bugungi sotuv</div>
-      <div class="sv" style="font-size:36px">${todS.length}<span style="font-size:16px;font-weight:400;color:#888;margin-left:4px">ta</span></div>
+      <div class="sv" style="font-size:36px">${todS.length}<span style="font-size:16px;font-weight:400;color:var(--c4);margin-left:4px">ta</span></div>
       ${ig?'<div class="ss" style="color:#5b21b6">'+ig.name+'</div>':''}
     </div>
     <div class="st" style="border-left:3px solid #22c55e;padding-left:11px">
@@ -360,28 +445,17 @@ function renderSotuv(){
   const searchEl=document.getElementById('sotuvSearch');
   const q=searchEl?searchEl.value.trim().toLowerCase():'';
   const allSP=q?D.products.filter(p=>p.name.toLowerCase().includes(q)):D.products;
-  if(!allSP.length){document.getElementById('prodList').innerHTML='<div style="text-align:center;padding:30px;color:#999;font-size:13px">Mahsulotlar yuklanmoqda...</div>';renderCartBar();return;}
+  if(!allSP.length){document.getElementById('prodList').innerHTML='<div style="text-align:center;padding:30px;color:var(--c5);font-size:13px">Mahsulotlar yuklanmoqda...</div>';renderCartBar();return;}
   const _SP=20,_spg=window._sotuvPage||1,_st=allSP.length,_ss=(_spg-1)*_SP;
   const myProds=allSP.slice(_ss,_ss+_SP);
-  const _sh='<div style="font-size:13px;font-weight:700;color:#999;padding:4px 2px 8px">Mahsulotlar '+(_ss+1)+'–'+Math.min(_ss+_SP,_st)+' / '+_st+'</div>';
+  const _sh='<div style="font-size:13px;font-weight:700;color:var(--c5);padding:4px 2px 8px">Mahsulotlar '+(_ss+1)+'–'+Math.min(_ss+_SP,_st)+' / '+_st+'</div>';
   let _spn='';
   if(Math.ceil(_st/_SP)>1){
     const _tp=Math.ceil(_st/_SP);let _bt='';
-    for(let i=1;i<=_tp;i++){const on=i===_spg;_bt+='<button onclick="window._sotuvPage='+i+';renderSotuv()" style="min-width:34px;height:34px;border-radius:8px;border:'+(on?'2px solid #185FA5':'1px solid #e5e7eb')+';background:'+(on?'#EFF6FF':'white')+';color:'+(on?'#185FA5':'#555')+';font-size:14px;cursor:pointer;font-family:inherit">'+i+'</button>';}
-    _spn='<div style="padding:12px 0;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap"><button onclick="if(window._sotuvPage>1){window._sotuvPage--;renderSotuv()}" '+((_spg===1)?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;opacity:'+((_spg===1)?'.4':'1')+'">&#8249;</button>'+_bt+'<button onclick="if(window._sotuvPage<'+_tp+'){window._sotuvPage++;renderSotuv()}" '+((_spg===_tp)?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#555;font-size:16px;cursor:pointer;opacity:'+((_spg===_tp)?'.4':'1')+'">&#8250;</button></div>';
+    for(let i=1;i<=_tp;i++){const on=i===_spg;_bt+='<button onclick="window._sotuvPage='+i+';renderSotuv()" style="min-width:34px;height:34px;border-radius:8px;border:'+(on?'2px solid var(--p)':'1px solid var(--bd)')+';background:'+(on?'var(--pbg)':'var(--bg1)')+';color:'+(on?'var(--p)':'var(--c2)')+';font-size:14px;cursor:pointer;font-family:inherit">'+i+'</button>';}
+    _spn='<div style="padding:12px 0;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap"><button onclick="if(window._sotuvPage>1){window._sotuvPage--;renderSotuv()}" '+((_spg===1)?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);color:var(--c2);font-size:16px;cursor:pointer;opacity:'+((_spg===1)?'.4':'1')+'">&#8249;</button>'+_bt+'<button onclick="if(window._sotuvPage<'+_tp+'){window._sotuvPage++;renderSotuv()}" '+((_spg===_tp)?'disabled':'')+' style="min-width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--bg1);color:var(--c2);font-size:16px;cursor:pointer;opacity:'+((_spg===_tp)?'.4':'1')+'">&#8250;</button></div>';
   }
-  const _cqB=(D.cart||[]).reduce((a,it)=>a+it.qty,0);
-  const _ctB=(D.cart||[]).reduce((a,it)=>a+(it.price*it.qty),0);
-  const _variantB=_cqB>0?'<div style="position:sticky;top:0;z-index:10;background:white;padding:8px 0 10px;margin-bottom:4px">'
-    +'<div style="background:#185FA5;border-radius:12px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
-    +'<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
-    +'<span style="color:white;font-size:22px">&#128722;</span>'
-    +'<div><div style="color:white;font-size:13px;font-weight:700;white-space:nowrap">'+_cqB+' ta mahsulot</div>'
-    +'<div style="color:rgba(255,255,255,.85);font-size:12px;font-weight:600">'+fmt(_ctB)+' so\'m</div></div>'
-    +'</div>'
-    +'<button onclick="openOrderForm()" style="background:white;color:#185FA5;border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Sotuv qilish &#8594;</button>'
-    +'</div></div>':'';
-  document.getElementById('prodList').innerHTML=_variantB+(_st?_sh:'')+myProds.map(p=>{
+  document.getElementById('prodList').innerHTML=(_st?_sh:'')+myProds.map(p=>{
     if(!D.cart) D.cart=[];
     const cnt=D.sales.filter(s=>String(s.sid)===String(D.user.id)&&String(s.pid)===String(p.id)).length;
     const cartQty=(D.cart||[]).filter(c=>String(c.pid)===String(p.id)).reduce((a,c)=>a+c.qty,0);
@@ -394,17 +468,17 @@ function renderSotuv(){
       :'<span style="background:#DCFCE7;color:#14532d;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700">'+_left+' ta bor</span>';
     const ih=p.img?`<img src="${p.img}" class="pi">`:`<div class="pib"><div class="pib-inner"><div style="width:60px;height:60px;border-radius:14px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:24px">&#128230;</div></div></div>`;
     return`<div class="pc" style="display:flex;flex-direction:row;align-items:stretch">
-  <div style="width:110px;flex-shrink:0;background:#f8f8f6;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border-radius:12px 0 0 12px;position:relative" onclick="showProdImg(${p.id})" style="cursor:pointer">
-    ${(()=>{const imgs=p.imgs&&p.imgs.length?p.imgs:(p.img?[p.img]:[]);if(!imgs.length) return '<div style="width:60px;height:60px;border-radius:10px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:24px">&#128230;</div>';return '<img src="'+imgs[0]+'" style="width:110px;height:110px;object-fit:contain;padding:8px">'+(imgs.length>1?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.5);color:white;font-size:10px;padding:2px 5px;border-radius:6px">+'+imgs.length+'</div>':'');})()}
+  <div style="width:110px;flex-shrink:0;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border-radius:12px 0 0 12px;position:relative" onclick="showProdImg(${p.id})" style="cursor:pointer">
+    ${(()=>{const imgs=p.imgs&&p.imgs.length?p.imgs:(p.img?[p.img]:[]);if(!imgs.length) return '<div style="width:60px;height:60px;border-radius:10px;background:var(--bg5);display:flex;align-items:center;justify-content:center;font-size:24px">&#128230;</div>';return '<img src="'+imgs[0]+'" style="width:110px;height:110px;object-fit:contain;padding:8px">'+(imgs.length>1?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.5);color:white;font-size:10px;padding:2px 5px;border-radius:6px">+'+imgs.length+'</div>':'');})()}
   </div>
-  <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+  <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;background:var(--bg1)">
     <div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--c1)">${p.name}</div>
       ${_badge?`<div style="margin-bottom:3px">${_badge}</div>`:''}
-      <div style="font-size:13px;color:#185FA5;font-weight:600;margin-bottom:3px">${fmt(p.price)} so'm</div>
-      <div style="font-size:14px;color:#888">Men sotdim: ${cnt} ta</div>
+      <div style="font-size:13px;color:var(--p);font-weight:600;margin-bottom:3px">${fmt(p.price)} so'm</div>
+      <div style="font-size:14px;color:var(--c4)">Men sotdim: ${cnt} ta</div>
     </div>
-    <button style="width:100%;${cartQty?'background:#EFF6FF;color:#185FA5;border:2px solid #185FA5':'background:#185FA5;color:#fff;border:none'};border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px" onclick="addToCart(${p.id})">${cartQty?'&#128722; Savatchada ('+cartQty+' ta) +':'&#128722; Savatchaga +'}</button>
+    <button style="width:100%;${cartQty?'background:var(--pbg);color:var(--p);border:2px solid var(--p)':'background:#185FA5;color:#fff;border:none'};border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px" onclick="addToCart(${p.id})">${cartQty?'&#128722; Savatchada ('+cartQty+' ta) +':'&#128722; Savatchaga +'}</button>
   </div>
 </div>`;
   }).join('')+_spn+(()=>{
@@ -412,10 +486,10 @@ function renderSotuv(){
     const _cq=D.cart.reduce((a,it)=>a+it.qty,0);
     const _ct=D.cart.reduce((a,it)=>a+(it.price*it.qty),0);
     if(!_cq) return '';
-    return '<div style="margin:16px 0 8px;background:#EFF6FF;border-radius:14px;padding:16px;border:2px solid #185FA5">'
+    return '<div style="margin:16px 0 8px;background:var(--pbg);border-radius:14px;padding:16px;border:2px solid var(--p)">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
-      +'<div style="font-size:14px;font-weight:700;color:#185FA5">&#128722; Savatcha: '+_cq+' ta mahsulot</div>'
-      +'<div style="font-size:15px;font-weight:800;color:#185FA5">'+fmt(_ct)+' so\'m</div>'
+      +'<div style="font-size:14px;font-weight:700;color:var(--p)">&#128722; Savatcha: '+_cq+' ta mahsulot</div>'
+      +'<div style="font-size:15px;font-weight:800;color:var(--p)">'+fmt(_ct)+' so\'m</div>'
       +'</div>'
       +'<button onclick="openOrderForm()" style="width:100%;background:#185FA5;color:white;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Sotuv qilish &#8594;</button>'
       +'</div>';
@@ -436,22 +510,19 @@ function addToCart(id){
     document.getElementById('imgSelTitle').textContent=p.name;
     const grid=document.getElementById('imgSelGrid');
     grid.innerHTML='';
-    imgs.forEach(function(url){
+    imgs.forEach(function(url,idx){
       const div=document.createElement('div');
-      div.style.cssText='border-radius:12px;border:2px solid #e5e7eb;overflow:hidden;cursor:pointer;background:#f8f8f6;transition:border-color .15s';
-      div.onmouseenter=function(){this.style.borderColor='#185FA5';};
-      div.onmouseleave=function(){this.style.borderColor='#e5e7eb';};
-      div.onclick=function(){
-        D.saleSelectedImg=url;
-        document.getElementById('imgSelW').classList.remove('show');
-        addToCartContinue();
-      };
+      div.id='imgOpt_'+idx;
+      div.style.cssText='border-radius:12px;border:2px solid #e5e7eb;overflow:hidden;cursor:pointer;background:#f8f8f6;transition:border-color .15s,background .15s';
+      div.onclick=(function(u,i){return function(){selectSaleImg(u,i);};})(url,idx);
       const img=document.createElement('img');
       img.src=url;
       img.style.cssText='width:100%;height:120px;object-fit:contain;display:block;padding:8px;pointer-events:none';
       div.appendChild(img);
       grid.appendChild(div);
     });
+    D.saleSelectedImg=imgs[0];
+    selectSaleImg(imgs[0],0);
     document.getElementById('imgSelW').classList.add('show');
     return;
   }
@@ -588,9 +659,9 @@ function renderCartItems(){
       +'<div style="font-size:12px;color:#185FA5;font-weight:600">'+fmt(item.price)+' so\'m &times; '+item.qty+' = '+fmt(lineTotal)+' so\'m</div>'
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0">'
-      +'<button onclick="updateCartQty('+i+',-1)" style="width:28px;height:28px;border-radius:8px;border:1px solid #ddd;background:white;font-size:16px;cursor:pointer;font-family:inherit">&#8722;</button>'
+      +'<button onclick="updateCartQty('+i+',-1)" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--bd4);background:var(--bg1);font-size:16px;cursor:pointer;font-family:inherit">&#8722;</button>'
       +'<span style="font-size:14px;font-weight:700;min-width:18px;text-align:center">'+item.qty+'</span>'
-      +'<button onclick="updateCartQty('+i+',1)" style="width:28px;height:28px;border-radius:8px;border:1px solid #ddd;background:white;font-size:16px;cursor:pointer;font-family:inherit">+</button>'
+      +'<button onclick="updateCartQty('+i+',1)" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--bd4);background:var(--bg1);font-size:16px;cursor:pointer;font-family:inherit">+</button>'
       +'<button onclick="removeFromCart('+i+')" style="width:28px;height:28px;border-radius:8px;border:none;background:#FEE2E2;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">&#10005;</button>'
       +'</div></div>';
   }).join('');
@@ -634,6 +705,18 @@ window.confirmSell = async function(){
     return;
   }
   document.getElementById('confErr').style.display='none';
+  if(payType==='card'&&!D_receiptImg){
+    const errEl=document.getElementById('confReceiptErr');
+    const areaEl=document.getElementById('receiptUploadArea');
+    if(errEl) errEl.style.display='block';
+    if(areaEl) areaEl.style.borderColor='#dc2626';
+    _sellLock=false;
+    return;
+  }
+  const receiptErrEl=document.getElementById('confReceiptErr');
+  const receiptAreaEl=document.getElementById('receiptUploadArea');
+  if(receiptErrEl) receiptErrEl.style.display='none';
+  if(receiptAreaEl) receiptAreaEl.style.borderColor='#e5e7eb';
   const now=new Date();
   const igId=D.saleIgId||D.user.igId||null;
   const orderId='ord_'+Date.now();
@@ -804,12 +887,12 @@ function renderMyMonthly(){
     +'</div></div></div>'
     
     // Taqsimot
-    +'<div style="background:white;border-radius:16px;border:0.5px solid #e5e7eb;padding:4px 16px 8px;margin-bottom:12px">'
-    +'<div style="font-size:12px;font-weight:700;color:#888;padding:12px 0 8px;letter-spacing:.5px">TAQSIMOT</div>'
+    +'<div style="background:var(--bg1);border-radius:16px;border:0.5px solid var(--bd);padding:4px 16px 8px;margin-bottom:12px">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--c4);padding:12px 0 8px;letter-spacing:.5px">TAQSIMOT</div>'
     
     +'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:0.5px solid #f0f0ec">'
     +'<div style="font-size:14px;color:#666;display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:#378ADD"></div>Sotuv daromadi'
-    +(salesCount>0&&comm>0?' <span style="font-size:12px;color:#999">('+salesCount+' × '+fmt(comm)+')</span>':'')
+    +(salesCount>0&&comm>0?' <span style="font-size:12px;color:var(--c5)">('+salesCount+' × '+fmt(comm)+')</span>':'')
     +'</div><div style="font-size:15px;font-weight:700;color:#0C447C">+'+fmt(salesIncome)+'</div></div>'
     
     +(salary>0?'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:0.5px solid #f0f0ec">'
@@ -818,17 +901,17 @@ function renderMyMonthly(){
     
     +(totalBonus>0?'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:0.5px solid #f0f0ec">'
     +'<div style="font-size:14px;color:#666;display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:#639922"></div>Bonus'
-    +' <span style="font-size:12px;color:#999">('+bonusDays+' kun × '+fmt(BC.bonusAmt)+')</span>'
+    +' <span style="font-size:12px;color:var(--c5)">('+bonusDays+' kun × '+fmt(BC.bonusAmt)+')</span>'
     +'</div><div style="font-size:15px;font-weight:700;color:#27500A">+'+fmt(totalBonus)+'</div></div>':'')
     
     +(totalFine>0?'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:0.5px solid #f0f0ec">'
     +'<div style="font-size:14px;color:#666;display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:#E24B4A"></div>Jarima'
-    +' <span style="font-size:12px;color:#999">('+fineDays+' kun × '+fmt(BC.fineAmt)+')</span>'
+    +' <span style="font-size:12px;color:var(--c5)">('+fineDays+' kun × '+fmt(BC.fineAmt)+')</span>'
     +'</div><div style="font-size:15px;font-weight:700;color:#A32D2D">−'+fmt(totalFine)+'</div></div>':'')
     
-    +'<div style="background:#f9f9f7;border-radius:10px;padding:12px 14px;margin:8px 0;display:flex;justify-content:space-between;align-items:center">'
-    +'<div style="font-size:14px;font-weight:700;color:#1a1a1a">Jami qo\'lga olaman</div>'
-    +'<div style="font-size:22px;font-weight:800;color:#15803d">'+fmt(netTotal)+' <span style="font-size:13px;font-weight:500;color:#888">so\'m</span></div></div>'
+    +'<div style="background:var(--bg2);border-radius:10px;padding:12px 14px;margin:8px 0;display:flex;justify-content:space-between;align-items:center">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--c1)">Jami qo\'lga olaman</div>'
+    +'<div style="font-size:22px;font-weight:800;color:#15803d">'+fmt(netTotal)+' <span style="font-size:13px;font-weight:500;color:var(--c4)">so\'m</span></div></div>'
     +'</div>'
     
     // Motivatsiya
@@ -855,7 +938,7 @@ function renderTarix(){
   document.getElementById('tarixSt').innerHTML=`
     <div class="st" style="border-left:3px solid #185FA5;padding-left:11px">
       <div class="sl" style="color:#185FA5">Sotuv soni</div>
-      <div class="sv" style="font-size:36px">${s.length}<span style="font-size:16px;font-weight:400;color:#888;margin-left:4px">ta</span></div>
+      <div class="sv" style="font-size:36px">${s.length}<span style="font-size:16px;font-weight:400;color:var(--c4);margin-left:4px">ta</span></div>
     </div>
     <div class="st" style="border-left:3px solid #22c55e;padding-left:11px">
       <div class="sl" style="color:#22c55e">Ishlab topdim</div>
@@ -907,7 +990,7 @@ function getBonusTarixHtml(sales){
       ?'<span style="background:#FECACA;color:#dc2626;padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700">-'+fmt(br.fine)+' jarima</span>'
       :'<span style="background:#FEF3C7;color:#92400e;padding:2px 8px;border-radius:8px;font-size:12px">—</span>';
     return '<div class="lr"><div style="flex:1"><div style="font-size:13px;font-weight:600">'+d+'</div>'
-      +'<div style="font-size:14px;color:#888">'+br.sales+' sotuv / '+br.dm+' DM</div></div>'
+      +'<div style="font-size:14px;color:var(--c4)">'+br.sales+' sotuv / '+br.dm+' DM</div></div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
       +'<span style="font-size:14px;font-weight:700;color:'+cCol+'">'+br.conv+'%</span>'
       +badge+'</div></div>';
@@ -919,7 +1002,7 @@ function getBonusTarixHtml(sales){
     +'<span style="font-size:15px;font-weight:800;color:'+(net>=0?'#15803d':'#dc2626')+'">'+(net>=0?'+':'')+fmt(net)+' so\'m</span></div>';
   
   return '<div style="grid-column:1/-1;border-top:1.5px solid #f0f0ec;margin-top:4px;padding-top:12px">'
-    +'<div style="font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:8px">Bonus / Jarima tarixi</div>'
+    +'<div style="font-size:13px;font-weight:700;color:var(--c1);margin-bottom:8px">Bonus / Jarima tarixi</div>'
     +rows+summary+'</div>';
 }
 

@@ -182,6 +182,8 @@ function _renderTasksPanel(el) {
       ? 'Barcha xodimlar'
       : to.map(id => { const s=(D.sellers||[]).find(s=>String(s.id)===String(id)); return s?s.name:'?'; }).join(', ');
 
+    const isOverdue = t.dueDate && t.status!=='bajarildi' && t.dueDate < today();
+
     let progressHtml = '';
     if (isAdmin) {
       const comp = t.completedBy||{};
@@ -196,7 +198,8 @@ function _renderTasksPanel(el) {
         const rows=[];
         if(doneNames.length) rows.push(`<div style="margin-top:4px"><span style="font-size:11px;color:#16a34a;font-weight:700">&#10003; Bajardi:</span> ${doneNames.map(n=>pill(n,'#DCFCE7','#16a34a')).join('')}</div>`);
         if(startedNames.length) rows.push(`<div style="margin-top:3px"><span style="font-size:11px;color:#7c3aed;font-weight:700">&#8635; Jarayonda:</span> ${startedNames.map(n=>pill(n,'#EDE9FE','#7c3aed')).join('')}</div>`);
-        if(notNames.length) rows.push(`<div style="margin-top:3px"><span style="font-size:11px;color:#aaa;font-weight:700">&#8722; Boshlamagan:</span> ${notNames.map(n=>pill(n,'var(--bg2)','#888')).join('')}</div>`);
+        if(notNames.length && isOverdue) rows.push(`<div style="margin-top:3px"><span style="font-size:11px;color:#dc2626;font-weight:700">&#10007; Bajarmadi:</span> ${notNames.map(n=>pill(n,'#FEF2F2','#dc2626')).join('')}</div>`);
+        else if(notNames.length) rows.push(`<div style="margin-top:3px"><span style="font-size:11px;color:#aaa;font-weight:700">&#8722; Boshlamagan:</span> ${notNames.map(n=>pill(n,'var(--bg2)','#888')).join('')}</div>`);
         progressHtml = `<div style="width:100%">${rows.join('')}</div>`;
       }
     }
@@ -228,13 +231,14 @@ function _renderTasksPanel(el) {
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span style="background:${pbg};color:${pc};padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">${pLabel}</span>
             <span style="background:${sbg};color:${sc};padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">${sLabel}</span>
+            ${isOverdue?`<span style="background:#FEF2F2;color:#dc2626;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">&#9888; Muddati o'tdi</span>`:''}
           </div>
           ${adminBtns}
         </div>
         <div style="font-size:15px;font-weight:700;color:var(--c1);margin-bottom:${t.desc?'4px':'6px'}">${t.title}</div>
         ${t.desc ? `<div style="font-size:13px;color:#666;margin-bottom:6px;line-height:1.5">${t.desc}</div>` : ''}
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--c4)">
-          ${t.dueDate ? `<span>&#128197; ${t.dueDate}</span>` : ''}
+          ${t.dueDate ? `<span style="${isOverdue?'color:#dc2626;font-weight:700':''}">&#128197; ${t.dueDate}</span>` : ''}
           <span>&#128101; ${assignLabel}</span>
           ${progressHtml}
         </div>

@@ -58,9 +58,9 @@ function _renderStratKpi(el) {
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <button onclick="_stratKpiNav(-1)" style="background:white;border:1px solid #e5e7eb;border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer">&#8249;</button>
-      <span style="font-size:15px;font-weight:700;color:#1a1a1a">${monthName}</span>
-      <button onclick="_stratKpiNav(1)" style="background:white;border:1px solid #e5e7eb;border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer">&#8250;</button>
+      <button onclick="_stratKpiNav(-1)" style="background:var(--bg1);border:1px solid var(--bd);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer">&#8249;</button>
+      <span style="font-size:15px;font-weight:700;color:var(--c1)">${monthName}</span>
+      <button onclick="_stratKpiNav(1)" style="background:var(--bg1);border:1px solid var(--bd);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer">&#8250;</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       ${_kpiCard('Sotuvlar soni', actualSales, kpi.salesTarget, 'ta', '#185FA5', '#EFF6FF', false)}
@@ -78,12 +78,12 @@ function _kpiCard(label, actual, target, unit, color, bg, isMoney) {
   const fmtVal = n => isMoney ? fmt(n) : String(n);
   return `
     <div style="background:${bg};border-radius:14px;padding:12px;border:1px solid ${color}33">
-      <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px">${label}</div>
+      <div style="font-size:11px;color:var(--c4);font-weight:600;margin-bottom:4px">${label}</div>
       <div style="font-size:20px;font-weight:700;color:${color}">${fmtVal(actual)}</div>
-      <div style="font-size:11px;color:#aaa;margin-bottom:4px">${unit}</div>
+      <div style="font-size:11px;color:var(--c4);margin-bottom:4px">${unit}</div>
       ${target ? `
-        <div style="font-size:11px;color:#aaa">Maqsad: ${fmtVal(target)}</div>
-        <div style="background:#e5e7eb;border-radius:6px;height:6px;margin-top:6px;overflow:hidden">
+        <div style="font-size:11px;color:var(--c4)">Maqsad: ${fmtVal(target)}</div>
+        <div style="background:var(--bd);border-radius:6px;height:6px;margin-top:6px;overflow:hidden">
           <div style="width:${pct}%;background:${barColor};height:100%;border-radius:6px;transition:width .4s"></div>
         </div>
         <div style="font-size:11px;color:${barColor};font-weight:700;margin-top:3px">${pct}%</div>`
@@ -157,7 +157,7 @@ function _renderStratPlans(el) {
   const typeBar = ['daily', 'weekly', 'monthly'].map(t => {
     const on = _planType === t;
     const label = t === 'daily' ? 'Kunlik' : t === 'weekly' ? 'Haftalik' : 'Oylik';
-    return `<button onclick="setPlanType('${t}')" style="flex:1;padding:8px 4px;border-radius:8px;border:2px solid ${on ? '#185FA5' : '#e5e7eb'};background:${on ? '#EFF6FF' : 'white'};color:${on ? '#185FA5' : '#888'};font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${label}</button>`;
+    return `<button onclick="setPlanType('${t}')" style="flex:1;padding:8px 4px;border-radius:8px;border:2px solid ${on ? 'var(--p)' : 'var(--bd)'};background:${on ? 'var(--pbg)' : 'var(--bg1)'};color:${on ? 'var(--p)' : 'var(--c4)'};font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${label}</button>`;
   }).join('');
 
   const planKey = _getPlanKey();
@@ -166,23 +166,23 @@ function _renderStratPlans(el) {
   const done = items.filter(i => i.done).length;
 
   const itemsHtml = items.length ? items.map((item, idx) => `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f3f4f6">
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)">
       <input type="checkbox" ${item.done ? 'checked' : ''} onchange="togglePlanItem('${planKey}',${idx},this.checked)" style="width:18px;height:18px;cursor:pointer;accent-color:#185FA5;flex-shrink:0">
-      <span style="flex:1;font-size:14px;color:${item.done ? '#bbb' : '#1a1a1a'};text-decoration:${item.done ? 'line-through' : 'none'};word-break:break-word">${item.text}</span>
+      <span style="flex:1;font-size:14px;color:${item.done ? 'var(--c6)' : 'var(--c1)'};text-decoration:${item.done ? 'line-through' : 'none'};word-break:break-word">${item.text}</span>
       <button onclick="deletePlanItem('${planKey}',${idx})" style="background:none;border:none;color:#dc2626;font-size:16px;cursor:pointer;padding:0 2px;flex-shrink:0">&#128465;</button>
     </div>`).join('')
-    : `<div style="text-align:center;padding:28px 16px;color:#aaa">
+    : `<div style="text-align:center;padding:28px 16px;color:var(--c4)">
         <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
         <div style="margin-top:8px;font-size:14px">Reja yo'q</div>
       </div>`;
 
   const progress = items.length
-    ? `<div style="font-size:12px;color:#888;margin-bottom:8px">&#10003; ${done} / ${items.length} bajarildi</div>`
+    ? `<div style="font-size:12px;color:var(--c4);margin-bottom:8px">&#10003; ${done} / ${items.length} bajarildi</div>`
     : '';
 
   el.innerHTML = `
     <div style="display:flex;gap:6px;margin-bottom:14px">${typeBar}</div>
-    <div style="background:white;border-radius:14px;border:1px solid #e5e7eb;padding:14px">
+    <div style="background:var(--bg1);border-radius:14px;border:1px solid var(--bd);padding:14px">
       <div style="font-size:13px;font-weight:700;color:#185FA5;margin-bottom:10px">&#128197; ${_getPlanLabel()}</div>
       ${progress}
       <div id="planItemsList">${itemsHtml}</div>
@@ -240,7 +240,7 @@ function _renderStratDecisions(el) {
     const label = f === 'all' ? 'Hammasi' : statusLabels[f];
     const c = f === 'all' ? '#185FA5' : statusColors[f];
     const b = f === 'all' ? '#EFF6FF' : statusBgs[f];
-    return `<button onclick="setDecFilter('${f}')" style="flex-shrink:0;padding:6px 12px;border-radius:10px;border:2px solid ${on ? c : '#e5e7eb'};background:${on ? b : 'white'};color:${on ? c : '#888'};font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">${label}</button>`;
+    return `<button onclick="setDecFilter('${f}')" style="flex-shrink:0;padding:6px 12px;border-radius:10px;border:2px solid ${on ? c : 'var(--bd)'};background:${on ? b : 'var(--bg1)'};color:${on ? c : 'var(--c4)'};font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">${label}</button>`;
   }).join('');
 
   let decs = [...(D.bizDecisions || [])];
@@ -249,11 +249,11 @@ function _renderStratDecisions(el) {
 
   const cards = decs.map(d => {
     const did = d._id || String(d.id);
-    const sc = statusColors[d.status] || '#888';
-    const sb = statusBgs[d.status] || '#f9fafb';
+    const sc = statusColors[d.status] || 'var(--c4)';
+    const sb = statusBgs[d.status] || 'var(--bg2)';
     const sl = statusLabels[d.status] || d.status;
     return `
-      <div style="background:white;border-radius:14px;padding:14px;border:1px solid #e5e7eb;margin-bottom:10px;border-left:4px solid ${sc}">
+      <div style="background:var(--bg1);border-radius:14px;padding:14px;border:1px solid var(--bd);margin-bottom:10px;border-left:4px solid ${sc}">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
           <span style="background:${sb};color:${sc};padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">${sl}</span>
           <div style="display:flex;gap:6px;flex-shrink:0">
@@ -261,9 +261,9 @@ function _renderStratDecisions(el) {
             <button onclick="deleteDec('${did}')" style="background:#FEF2F2;color:#dc2626;border:none;border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;font-family:inherit">&#128465;</button>
           </div>
         </div>
-        <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:${d.note ? '6px' : '4px'}">${d.text}</div>
-        ${d.note ? `<div style="font-size:13px;color:#666;line-height:1.5;margin-bottom:6px">${d.note}</div>` : ''}
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:#aaa">
+        <div style="font-size:15px;font-weight:700;color:var(--c1);margin-bottom:${d.note ? '6px' : '4px'}">${d.text}</div>
+        ${d.note ? `<div style="font-size:13px;color:var(--c3);line-height:1.5;margin-bottom:6px">${d.note}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--c4)">
           <span>&#128197; ${d.date}</span>
           ${d.assignee ? `<span>&#128100; ${d.assignee}</span>` : ''}
         </div>
@@ -275,7 +275,7 @@ function _renderStratDecisions(el) {
       </div>`;
   }).join('');
 
-  const empty = `<div style="text-align:center;padding:40px 16px;color:#aaa">
+  const empty = `<div style="text-align:center;padding:40px 16px;color:var(--c4)">
     <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
     <div style="margin-top:8px;font-size:14px">Qaror yo'q</div>
   </div>`;

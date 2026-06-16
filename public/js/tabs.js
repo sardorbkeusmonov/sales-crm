@@ -23,6 +23,7 @@ function buildSellerTabs(){
     income:ic2('<circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/><line x1="12" y1="6" x2="12" y2="18"/>'),
   };
   const taskIc2=ic2('<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6"/><path d="M9 16h4"/>');
+  const profIc2=ic2('<circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/>');
   document.getElementById('tabbar').innerHTML=`
     <button id="sotuvTab" class="tab on" style="position:relative" onclick="goTab('tMyD','Sotuv',this)">${I2.dash}<span style="font-size:13px">Sotuv</span><span id="cartBadge" style="display:none;position:absolute;top:4px;right:4px;background:#dc2626;color:white;border-radius:50%;min-width:17px;height:17px;font-size:10px;font-weight:800;line-height:17px;text-align:center;padding:0 3px;pointer-events:none">0</span></button>
     <button class="tab" onclick="goTab('tMyJ','Jamoa',this)">${I2.team}<span style="font-size:13px">Jamoa</span></button>
@@ -31,7 +32,8 @@ function buildSellerTabs(){
     <button class="tab" onclick="goTab('tTahlil','Tahlil',this)">${I2.chart}<span style="font-size:13px">Tahlil</span></button>
     <button class="tab" onclick="goTab('tKPI','KPI',this)">${ic2('<circle cx="12" cy="12" r="1"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M13 3.055a9 9 0 1 0 7.941 7.945"/><path d="M15 6v3h3l3 -3h-3v-3z"/><path d="M15 9l-3 3"/>')}<span style="font-size:13px">KPI</span></button>
     <button class="tab" onclick="goTab('tTasks','Topshiriqlar',this)">${taskIc2}<span style="font-size:13px">Topshiriq</span></button>
-    <button class="tab" onclick="goTab('tVideo','Video muloqot',this)">${ic2('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>')}<span style="font-size:13px">Video</span></button>`;
+    <button class="tab" onclick="goTab('tVideo','Video muloqot',this)">${ic2('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>')}<span style="font-size:13px">Video</span></button>
+    <button class="tab" onclick="goTab('tSellerProf','Profil',this)">${profIc2}<span style="font-size:13px">Profil</span></button>`;
   buildSidebar([
     {id:'tMyD',label:'Sotuv',icon:I2.dash},
     {id:'tMyJ',label:'Jamoa',icon:I2.team},
@@ -41,11 +43,12 @@ function buildSellerTabs(){
     {id:'tKPI',label:'KPI Maqsadlar',icon:ic2('<circle cx="12" cy="12" r="1"/><path d="M12 7a5 5 0 1 0 5 5"/><path d="M13 3.055a9 9 0 1 0 7.941 7.945"/><path d="M15 6v3h3l3 -3h-3v-3z"/><path d="M15 9l-3 3"/>')},
     {id:'tTasks',label:'Topshiriqlar',icon:taskIc2},
     {id:'tVideo',label:'Video muloqot',icon:ic2('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>')},
+    {id:'tSellerProf',label:'Profil',icon:profIc2},
   ]);
   setSidebarActive('tMyD');
 }
 
-const ALL_TABS=['tDash','tJamoa','tProd','tSellers','tTahlil','tProfile','tSofFoyda','tMyD','tTarix','tMyJ','tWarehouse','tDelivery','tMyOrders','tMob','tKPI','tTasks','tStrategy','tVideo'];
+const ALL_TABS=['tDash','tJamoa','tProd','tSellers','tTahlil','tProfile','tSofFoyda','tMyD','tTarix','tMyJ','tWarehouse','tDelivery','tMyOrders','tMob','tKPI','tTasks','tStrategy','tVideo','tSellerProf'];
 function hideAll(){ALL_TABS.forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.style.paddingTop='';}});const fb=document.getElementById('tabFilterBar');if(fb)fb.style.display='none';}
 function goT(id,title){hideAll();document.getElementById(id).style.display='block';document.getElementById('ttitle').textContent=title;}
 function goTab(id,title,el){
@@ -75,6 +78,7 @@ function goTab(id,title,el){
   if(id==='tStrategy')renderStrategy();
   if(id==='tSofFoyda')renderSofFoyda();
   if(id==='tVideo')renderVideo();
+  if(id==='tSellerProf')renderSellerProf();
   if(id==='tMyD')renderMyD();
   if(id==='tTarix')renderTarix();
   if(id==='tMyJ'){renderMyJ();mjView('s',document.querySelector('#tMyJ .sb'));}

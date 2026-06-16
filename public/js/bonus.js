@@ -40,9 +40,9 @@ function renderTCal(){
     const ds=T_CAL.year+'-'+String(T_CAL.month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const isF=T_CAL.from===ds,isT=T_CAL.to===ds;
     const inR=T_CAL.from&&T_CAL.to&&ds>T_CAL.from&&ds<T_CAL.to;
-    let bg='transparent',col='#1a1a1a',fw='400',br='50%';
-    if(isF||isT){bg='#185FA5';col='#fff';fw='700';}
-    else if(inR){bg='#DBEAFE';br='0';}
+    let bg='transparent',col='var(--c1)',fw='400',br='50%';
+    if(isF||isT){bg='var(--p)';col='#fff';fw='700';}
+    else if(inR){bg='var(--pbd)';br='0';}
     cells+=`<div onclick="tCalClick('${ds}')" style="cursor:pointer;padding:7px 2px;border-radius:${br};background:${bg};color:${col};font-weight:${fw};font-size:13px">${d}</div>`;
   }
   document.getElementById('tCalGrid').innerHTML=cells;
@@ -79,12 +79,12 @@ function renderTahlil(){
   if(igBtn) igBtn.style.display=showExcel?'flex':'none';
   if(prodBtn) prodBtn.style.display=showExcel?'flex':'none';
   const canEdit=D.user&&D.user.role==='targetolog';
-  const canViewBudget=D.user&&(D.user.isAdmin||D.user.role==='targetolog');
+  const canViewBudget=D.user&&(D.user.isAdmin||D.user.role==='targetolog'||D.user.role==='sotuvchi');
   // thead larni render qilish
-  const THST='padding:10px 8px;text-align:center;font-size:13px;color:#999;font-weight:600;text-transform:uppercase;border-bottom:2px solid #eee;white-space:nowrap';
-  const THSTL='padding:10px 8px;text-align:left;font-size:13px;color:#999;font-weight:600;text-transform:uppercase;border-bottom:2px solid #eee;white-space:nowrap';
+  const THST='padding:10px 8px;text-align:center;font-size:13px;color:var(--c5);font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--bd);white-space:nowrap';
+  const THSTL='padding:10px 8px;text-align:left;font-size:13px;color:var(--c5);font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--bd);white-space:nowrap';
   const th1El=document.getElementById('tahlilHead1');
-  if(th1El) th1El.innerHTML='<tr style="background:#f5f5f0">'
+  if(th1El) th1El.innerHTML='<tr style="background:var(--bg5)">'
     +'<th style="'+THSTL+'">Instagram</th>'
     +(canViewBudget?'<th style="'+THST+'">Budjet<br>($)</th>':'')
     +'<th style="'+THST+'">DM<br>soni</th>'
@@ -95,7 +95,7 @@ function renderTahlil(){
     +(canEdit?'<th style="padding:10px 8px;border-bottom:2px solid #eee"></th>':'')
     +'</tr>';
   const th2El=document.getElementById('tahlilHead2');
-  if(th2El) th2El.innerHTML='<tr style="background:#f5f5f0">'
+  if(th2El) th2El.innerHTML='<tr style="background:var(--bg5)">'
     +'<th style="'+THSTL+'">Instagram</th>'
     +'<th style="'+THSTL+'">Mahsulot</th>'
     +(canViewBudget?'<th style="'+THST+'">Budjet<br>($)</th>':'')
@@ -149,18 +149,18 @@ function renderTahlil(){
     const igSels2=D.sellers.filter(s=>s.igId===ig.id);
     return{ig,d,sales,conv,cpd,cps,rev:rev2,sels:igSels2};
   });
-  document.getElementById('tahlilBody1').innerHTML=rows1.map(r=>`<tr style="border-bottom:1px solid #f0f0ec">
+  document.getElementById('tahlilBody1').innerHTML=rows1.map(r=>`<tr style="border-bottom:1px solid var(--bg5)">
     <td style="padding:10px 8px;white-space:nowrap">
-      <div style="font-weight:700;color:#5b21b6">${r.ig.name}</div>
-      <div style="font-size:14px;color:#999;margin-top:2px">${r.sels.length?r.sels.map(s=>s.name).join(', '):'Ishchi biriktirilmagan'}</div>
+      <div style="font-weight:700;color:var(--purple)">${r.ig.name}</div>
+      <div style="font-size:14px;color:var(--c5);margin-top:2px">${r.sels.length?r.sels.map(s=>s.name).join(', '):'Ishchi biriktirilmagan'}</div>
     </td>
     ${canViewBudget?`<td style="padding:10px 8px;text-align:center;font-weight:600">${r.d.budget?(r.d.budget+'$'):'-'}</td>`:''}
     <td style="padding:10px 8px;text-align:center;font-weight:600">${r.d.dms||'-'}</td>
-    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:${r.cpd!=='-'?'#185FA5':'#bbb'};font-weight:600">${r.cpd}</td>`:''}
+    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:${r.cpd!=='-'?'var(--p)':'var(--c6)'};font-weight:600">${r.cpd}</td>`:''}
     <td style="padding:10px 8px;text-align:center"><span style="background:#DBEAFE;color:#1e40af;padding:2px 8px;border-radius:10px;font-weight:600;font-size:15px">${r.sales}</span></td>
-    <td style="padding:10px 8px;text-align:center;font-weight:600;color:${r.conv!=='-'?(parseFloat(r.conv)>=10?'#166634':'#92400e'):'#bbb'}">${r.conv!=='-'?r.conv+'%':'-'}</td>
-    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:${r.cps!=='-'?'#185FA5':'#bbb'};font-weight:600">${r.cps}</td><td style="padding:10px 8px;text-align:center;font-weight:600;color:#166534">${fmt(r.rev)}</td>`:''}
-    ${canEdit?`<td style="padding:10px 8px;text-align:center"><button onclick="openIgEdit(${r.ig.id})" style="background:#EDE9FE;color:#5b21b6;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:15px;font-family:inherit;font-weight:500">Kiritish</button></td>`:''}
+    <td style="padding:10px 8px;text-align:center;font-weight:600;color:${r.conv!=='-'?(parseFloat(r.conv)>=10?'var(--grn)':'var(--amber)'):'var(--c6)'}">${r.conv!=='-'?r.conv+'%':'-'}</td>
+    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:${r.cps!=='-'?'var(--p)':'var(--c6)'};font-weight:600">${r.cps}</td><td style="padding:10px 8px;text-align:center;font-weight:600;color:#166534">${fmt(r.rev)}</td>`:''}
+    ${canEdit?`<td style="padding:10px 8px;text-align:center"><button onclick="openIgEdit(${r.ig.id})" style="background:var(--purplebg);color:var(--purple);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:15px;font-family:inherit;font-weight:500">Kiritish</button></td>`:''}
   </tr>`).join('');
   // Jami row — all totals
   const jamiRev=rows1.reduce((a,r)=>a+r.rev,0);
@@ -169,14 +169,14 @@ function renderTahlil(){
   const jamiSales=rows1.reduce((a,r)=>a+r.sales,0);
   const jamiCpd=jamiDms>0&&jamiBudjet>0?(jamiBudjet/jamiDms).toFixed(2):'-';
   const jamiCps=jamiSales>0&&jamiBudjet>0?(jamiBudjet/jamiSales).toFixed(2):'-';
-  document.getElementById('tahlilBody1').innerHTML+=`<tr style="background:#EFF6FF;font-weight:700;border-top:2px solid #BFDBFE">
-    <td style="padding:10px 8px;font-size:13px;color:#1e40af;font-weight:700">Jami</td>
-    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:#1a1a1a">${jamiBudjet||'-'}</td>`:''}
-    <td style="padding:10px 8px;text-align:center;color:#1a1a1a">${jamiDms||'-'}</td>
-    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:#185FA5">${jamiCpd}</td>`:''}
-    <td style="padding:10px 8px;text-align:center"><span style="background:#185FA5;color:#fff;padding:2px 8px;border-radius:10px;font-size:15px">${jamiSales}</span></td>
-    <td style="padding:10px 8px;text-align:center;color:#92400e">${jamiDms>0?((jamiSales/jamiDms)*100).toFixed(1)+'%':'-'}</td>
-    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:#185FA5">${jamiCps}</td><td style="padding:10px 8px;text-align:center;color:#166534;font-size:14px">${fmt(jamiRev)}</td>`:''}
+  document.getElementById('tahlilBody1').innerHTML+=`<tr style="background:var(--pbg);font-weight:700;border-top:2px solid var(--pbd)">
+    <td style="padding:10px 8px;font-size:13px;color:var(--p);font-weight:700">Jami</td>
+    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:var(--c1)">${jamiBudjet||'-'}</td>`:''}
+    <td style="padding:10px 8px;text-align:center;color:var(--c1)">${jamiDms||'-'}</td>
+    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:var(--p)">${jamiCpd}</td>`:''}
+    <td style="padding:10px 8px;text-align:center"><span style="background:var(--p);color:#fff;padding:2px 8px;border-radius:10px;font-size:15px">${jamiSales}</span></td>
+    <td style="padding:10px 8px;text-align:center;color:var(--amber)">${jamiDms>0?((jamiSales/jamiDms)*100).toFixed(1)+'%':'-'}</td>
+    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:var(--p)">${jamiCps}</td><td style="padding:10px 8px;text-align:center;color:var(--grn);font-size:14px">${fmt(jamiRev)}</td>`:''}
     ${canEdit?'<td></td>':''}
   </tr>`;
   // Mahsulot boyicha: sotuvchiga faqat oz instagram profili
@@ -208,26 +208,26 @@ function renderTahlil(){
       rows2.push({ig,prod,d,sales,conv,cpd,cps,rev:rev3});
     });
   });
-  const ig2Colors=['#F8F4FF','#F0FDF4','#FFF7ED','#EFF6FF'];
+  const ig2Colors=isDark()?['#1a1123','#0d2011','#1c1505','#0d2035']:['#F8F4FF','#F0FDF4','#FFF7ED','#EFF6FF'];
   const ig2Ids=[...new Set(rows2.map(r=>r.ig.id))];
   document.getElementById('tahlilBody2').innerHTML=rows2.map(r=>{
     const colorIdx=ig2Ids.indexOf(r.ig.id)%ig2Colors.length;
     const bg=ig2Colors[colorIdx];
-    return`<tr style="border-bottom:1px solid #f0f0ec;background:${bg}">
-    <td style="padding:10px 8px;font-weight:700;color:#5b21b6;white-space:nowrap;font-size:14px">${r.ig.name}</td>
+    return`<tr style="border-bottom:1px solid var(--bg5);background:${bg}">
+    <td style="padding:10px 8px;font-weight:700;color:var(--purple);white-space:nowrap;font-size:14px">${r.ig.name}</td>
     <td style="padding:10px 8px">
       <div style="display:flex;align-items:center;gap:6px;cursor:pointer" onclick="showProdImg(${r.prod.id})">
-        ${r.prod.img?`<div style="width:28px;height:28px;border-radius:4px;overflow:hidden;flex-shrink:0;border:1px solid #eee"><img src="${r.prod.img}" style="width:100%;height:100%;object-fit:cover"></div>`:'<div style="width:28px;height:28px;border-radius:4px;background:#f0f0ec;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px">&#128230;</div>'}
-        <span style="font-size:15px;font-weight:500;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${r.prod.img?'#185FA5':'#1a1a1a'}">${r.prod.name}</span>
+        ${r.prod.img?`<div style="width:28px;height:28px;border-radius:4px;overflow:hidden;flex-shrink:0;border:1px solid var(--bd)"><img src="${r.prod.img}" style="width:100%;height:100%;object-fit:cover"></div>`:'<div style="width:28px;height:28px;border-radius:4px;background:var(--bg5);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px">&#128230;</div>'}
+        <span style="font-size:15px;font-weight:500;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${r.prod.img?'var(--p)':'var(--c1)'}">${r.prod.name}</span>
       </div>
     </td>
     ${canViewBudget?`<td style="padding:10px 8px;text-align:center;font-weight:600">${r.d.budget?(r.d.budget+'$'):'-'}</td>`:''}
     <td style="padding:10px 8px;text-align:center;font-weight:600">${r.d.dms||'-'}</td>
-    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:${r.cpd!=='-'?'#185FA5':'#bbb'};font-weight:600">${r.cpd}</td>`:''}
+    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:${r.cpd!=='-'?'var(--p)':'var(--c6)'};font-weight:600">${r.cpd}</td>`:''}
     <td style="padding:10px 8px;text-align:center"><span style="background:#DBEAFE;color:#1e40af;padding:2px 8px;border-radius:10px;font-weight:600;font-size:15px">${r.sales}</span></td>
     <td style="padding:10px 8px;text-align:center;font-weight:600;color:${r.conv!=='-'?(parseFloat(r.conv)>=10?'#166534':'#92400e'):'#bbb'}">${r.conv!=='-'?r.conv+'%':'-'}</td>
-    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:${r.cps!=='-'?'#185FA5':'#bbb'};font-weight:600">${r.cps}</td><td style="padding:10px 8px;text-align:center;font-weight:600;color:#166534">${fmt(r.rev)}</td>`:''}
-    ${canEdit?`<td style="padding:10px 8px;text-align:center"><button onclick="openProdEdit(${r.ig.id},${r.prod.id})" style="background:#EDE9FE;color:#5b21b6;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:15px;font-family:inherit;font-weight:500">Kiritish</button></td>`:''}
+    ${canViewBudget?`<td style="padding:10px 8px;text-align:center;color:${r.cps!=='-'?'var(--p)':'var(--c6)'};font-weight:600">${r.cps}</td><td style="padding:10px 8px;text-align:center;font-weight:600;color:#166534">${fmt(r.rev)}</td>`:''}
+    ${canEdit?`<td style="padding:10px 8px;text-align:center"><button onclick="openProdEdit(${r.ig.id},${r.prod.id})" style="background:var(--purplebg);color:var(--purple);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:15px;font-family:inherit;font-weight:500">Kiritish</button></td>`:''}
   </tr>`;}).join('');
 }
 function openIgEdit(igId){
@@ -297,11 +297,11 @@ function renderYesterdayBonus(sellerId){
     
     let result='<div style="grid-column:1/-1;border-radius:12px;overflow:hidden;border:1px solid '+cBorder+';margin-bottom:8px">';
     result+='<div style="background:'+cBg+';padding:12px 14px">';
-    result+='<div style="font-size:15px;color:#888;margin-bottom:6px;font-weight:600">Kechagi natija &nbsp;|&nbsp; '+yd+'</div>';
+    result+='<div style="font-size:15px;color:var(--c4);margin-bottom:6px;font-weight:600">Kechagi natija &nbsp;|&nbsp; '+yd+'</div>';
     result+='<div style="display:flex;align-items:center;justify-content:space-between">';
     result+='<div>';
     result+='<div style="font-size:24px;font-weight:800;color:'+cCol+'">'+br.conv+'% konversiya</div>';
-    result+='<div style="font-size:12px;color:#888">'+br.sales+' sotuv / '+br.dm+' DM</div>';
+    result+='<div style="font-size:12px;color:var(--c4)">'+br.sales+' sotuv / '+br.dm+' DM</div>';
     result+='</div>';
     result+='<div style="text-align:right">';
     if(isBonus) result+='<div style="background:#15803d;color:white;padding:5px 10px;border-radius:8px;font-size:13px;font-weight:700">+'+fmt(br.bonus)+' so\'m &#127881;<br><span style="font-size:11px;font-weight:400">Bonus!</span></div>';
@@ -338,9 +338,9 @@ function renderBonusBlock(sellerId, date){
   const cBorder=conv>=BC.bonusConv?'#bbf7d0':conv<BC.fineConv?'#fecaca':'#fde68a';
   let html='<div style="grid-column:1/-1;border-radius:12px;overflow:hidden;border:1px solid '+cBorder+'">';
   html+='<div style="background:'+cBg+';padding:12px 14px;display:flex;align-items:center;justify-content:space-between">';
-  html+='<div><div style="font-size:11px;color:#888;margin-bottom:2px">Bugungi konversiya</div>';
+  html+='<div><div style="font-size:11px;color:var(--c4);margin-bottom:2px">Bugungi konversiya</div>';
   html+='<div style="font-size:26px;font-weight:800;color:'+cCol+'">'+br.conv+'%</div>';
-  html+='<div style="font-size:11px;color:#888">'+br.sales+' sotuv / '+br.dm+' DM</div></div>';
+  html+='<div style="font-size:11px;color:var(--c4)">'+br.sales+' sotuv / '+br.dm+' DM</div></div>';
   html+='<div style="text-align:right">';
   if(isBonus) html+='<div style="background:#15803d;color:white;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:700">+'+fmt(br.bonus)+' so\'m &#127881;<br><span style="font-size:11px;font-weight:400">Bonus!</span></div>';
   else if(isFine) html+='<div style="background:#dc2626;color:white;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:700">-'+fmt(br.fine)+' so\'m &#128683;<br><span style="font-size:11px;font-weight:400">Jarima</span></div>';
@@ -426,7 +426,7 @@ function renderSellerConvPanel(){
   const sellers=isSeller
     ?D.sellers.filter(s=>s.id===D.user.id)
     :D.sellers.filter(s=>s.role==='sotuvchi'||!s.role);
-  if(!sellers.length){document.getElementById('sellerConvList').innerHTML='<div style="font-size:13px;color:#999;text-align:center;padding:8px">Sotuvchi yo\'q</div>';return;}
+  if(!sellers.length){document.getElementById('sellerConvList').innerHTML='<div style="font-size:13px;color:var(--c5);text-align:center;padding:8px">Sotuvchi yo\'q</div>';return;}
   
   const AV_COLORS=['#DBEAFE|#1e40af','#DCFCE7|#166534','#EDE9FE|#5b21b6','#FCE7F3|#9d174d'];
   
@@ -470,9 +470,9 @@ function renderSellerConvPanel(){
       return '<div style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-top:0.5px solid #f0f0ec">'
         +'<div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center;flex-shrink:0">'
         +'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/></svg></div>'
-        +'<span style="font-size:12px;font-weight:600;color:#5b21b6;min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+ig.igName+'</span>'
-        +'<span style="font-size:11px;color:#888;white-space:nowrap">'+ig.sales+'/'+ig.dm+'</span>'
-        +'<div style="flex:1;height:5px;background:#f0f0ec;border-radius:3px"><div style="height:5px;border-radius:3px;background:'+igColor+';width:'+Math.min(barW*4,100)+'%"></div></div>'
+        +'<span style="font-size:12px;font-weight:600;color:var(--purple);min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+ig.igName+'</span>'
+        +'<span style="font-size:11px;color:var(--c4);white-space:nowrap">'+ig.sales+'/'+ig.dm+'</span>'
+        +'<div style="flex:1;height:5px;background:var(--bg5);border-radius:3px"><div style="height:5px;border-radius:3px;background:'+igColor+';width:'+Math.min(barW*4,100)+'%"></div></div>'
         +'<span style="font-size:13px;font-weight:700;color:'+igColor+';min-width:38px;text-align:right">'+ig.conv+'%</span>'
         +badge+'</div>';
     }).join('');
@@ -482,15 +482,15 @@ function renderSellerConvPanel(){
       +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
       +'<span style="font-size:12px;color:#92400e">DM soni kiritilmagan</span></div>':'';
     
-    return '<div style="background:white;border-radius:12px;border:0.5px solid #e5e7eb;margin-bottom:8px;overflow:hidden">'
+    return '<div style="background:var(--bg1);border-radius:12px;border:0.5px solid var(--bd);margin-bottom:8px;overflow:hidden">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px">'
       +'<div style="display:flex;align-items:center;gap:10px">'
       +'<div style="width:34px;height:34px;border-radius:50%;background:'+avBg+';color:'+avCl+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">'+initials+'</div>'
       +'<div>'
-      +'<div style="font-size:14px;font-weight:700;color:#1a1a1a">'+sel.name+'</div>'
-      +'<div style="font-size:11px;color:#888">'+igConvs.length+' ta Instagram</div>'
+      +'<div style="font-size:14px;font-weight:700;color:var(--c1)">'+sel.name+'</div>'
+      +'<div style="font-size:11px;color:var(--c4)">'+igConvs.length+' ta Instagram</div>'
       +'</div></div>'
-      +(hasData?'<div style="text-align:right"><div style="font-size:11px;color:#888">o\'rtacha</div><div style="font-size:20px;font-weight:800;color:'+avgColor+'">'+br.conv+'%</div></div>':'')
+      +(hasData?'<div style="text-align:right"><div style="font-size:11px;color:var(--c4)">o\'rtacha</div><div style="font-size:20px;font-weight:800;color:'+avgColor+'">'+br.conv+'%</div></div>':'')
       +'</div>'
       +igRows
       +noDataRow

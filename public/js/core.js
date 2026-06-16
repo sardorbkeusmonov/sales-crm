@@ -55,7 +55,7 @@ let D={
     {id:15,sid:4,igId:4,pid:3,date:'2026-04-15',time:'11:20'},
   ],
   admin:{name:'Farruh Asqarov',login:'farruh',pass:'1234'},
-  user:null,selC:'#B5D4F4',imgD:'',ePid:null,eSid:null,eIgId:null,pPid:null,saleSelectedImg:'',igDailyDM:{},bonusConfig:{bonusConv:21,bonusAmt:30000,fineConv:10,fineAmt:20000},dollarRate:12500,expenses:[],activeAds:[],kpiGoals:[],tasks:[],announcements:[],bizKpi:[],bizPlans:[],bizDecisions:[]
+  user:null,selC:'#B5D4F4',imgD:'',ePid:null,eSid:null,eIgId:null,pPid:null,saleSelectedImg:'',igDailyDM:{},bonusConfig:{bonusConv:21,bonusAmt:30000,fineConv:10,fineAmt:20000},dollarRate:12500,expenses:[],activeAds:[],kpiGoals:[],tasks:[],announcements:[],bizKpi:[],bizPlans:[],bizDecisions:[],attendance:[]
 };
 
 let TA={igData:{},prodData:{}};
@@ -75,6 +75,47 @@ const rv=arr=>arr.reduce((a,s)=>{if(s.items&&s.items.length)return a+s.items.red
 function buildHints(){
   document.getElementById('lhints').innerHTML='';
 }
+
+// === DARK MODE ===
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
+function dc(l,d){return isDark()?d:l;}
+
+function applyDarkMode(dark){
+  document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+  try{localStorage.setItem('crm_theme', dark?'dark':'light');}catch(e){}
+  _updateDmIcons(dark);
+}
+
+function toggleDarkMode(){
+  applyDarkMode(!isDark());
+  _rerenderCurrentView();
+}
+
+function _updateDmIcons(dark){
+  const sunSvg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+  const moonSvg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  const icon=dark?sunSvg:moonSvg;
+  const label=dark?'Light mode':'Dark mode';
+  ['dmToggle','mobileDmToggle'].forEach(function(id){
+    const el=document.getElementById(id);
+    if(el){el.innerHTML=icon+'<span>'+label+'</span>';}
+  });
+}
+
+function _rerenderCurrentView(){
+  if(!D.user) return;
+  const tabs=['tDash','tJamoa','tProd','tSellers','tTahlil','tProfile','tSofFoyda','tMyD','tTarix','tMyJ','tWarehouse','tDelivery','tMyOrders','tMob','tKPI','tTasks','tStrategy','tVideo'];
+  const active=tabs.find(id=>{const el=document.getElementById(id);return el&&el.style.display!=='none';});
+  if(active) goTab(active,document.getElementById('ttitle').textContent,null);
+}
+
+// Init dark mode from localStorage
+(function(){
+  try{
+    const saved=localStorage.getItem('crm_theme');
+    if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');}
+  }catch(e){}
+})();
 
 function togglePass(inputId,btn){
   const inp=document.getElementById(inputId);
