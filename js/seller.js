@@ -508,6 +508,7 @@ function addToCart(id){
   const imgs=rawImgs.length>1?rawImgs:(p.img?[p.img]:[]);
   if(imgs.length>1){
     document.getElementById('imgSelTitle').textContent=p.name;
+    document.getElementById('imgSelPrice').textContent=fmt(p.price)+" so'm";
     document.getElementById('imgSelBig').src=imgs[0];
     const grid=document.getElementById('imgSelGrid');
     grid.innerHTML='';
