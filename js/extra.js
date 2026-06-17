@@ -438,7 +438,7 @@ function setKpiPeriod() {}
 
 
 // ===== TELEGRAM XABARNOMA =====
-const TG_TOKEN = '7948798966:AAE-FSFuvAmW52abdq3wyISr-DkDn4LY_tg';
+const TG_TOKEN = '7948798966:AAE-FSFuvAmW52abdq3wyISr-DkDn4LY';
 const TG_CHAT = '-5256487011';
 
 async function sendTelegramNotification(sale){
@@ -475,10 +475,12 @@ async function sendTelegramNotification(sale){
     const hasProdImg=allImgUrls.length>0;
     const hasReceipt=!!sale.receiptUrl;
 
-    await fetch('https://api.telegram.org/bot'+TG_TOKEN+'/sendMessage',{
+    const _tgRes=await fetch('https://api.telegram.org/bot'+TG_TOKEN+'/sendMessage',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({chat_id:TG_CHAT,text:text})
     });
+    const _tgJson=await _tgRes.json();
+    console.log('[TG] sendMessage javob:',_tgJson);
 
     const mediaItems=[];
     allImgUrls.forEach(function(u,i){mediaItems.push({type:'photo',media:u,caption:i===0?'📦 Mahsulot rasmi':''});});
@@ -494,7 +496,7 @@ async function sendTelegramNotification(sale){
         body:JSON.stringify({chat_id:TG_CHAT,photo:mediaItems[0].media,caption:mediaItems[0].caption})
       });
     }
-  }catch(e){console.error('Telegram error:',e);}
+  }catch(e){console.error('[TG] Telegram error:',e);}
 }
 
 function renderActiveAdsPanel(){

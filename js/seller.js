@@ -725,6 +725,7 @@ window.confirmSell = async function(){
   };
   D.sales.push(sale);
   if(window.FS) window.FS.addSale(sale);
+  console.log('[TG] sendTelegramNotification chaqirilmoqda, sale:', sale.orderId);
   sendTelegramNotification(sale);
   D.cart=[];
   closeConf();
