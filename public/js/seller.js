@@ -468,7 +468,7 @@ function renderSotuv(){
       :'<span style="background:#DCFCE7;color:#14532d;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700">'+_left+' ta bor</span>';
     const ih=p.img?`<img src="${p.img}" class="pi">`:`<div class="pib"><div class="pib-inner"><div style="width:60px;height:60px;border-radius:14px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:24px">&#128230;</div></div></div>`;
     return`<div class="pc" style="display:flex;flex-direction:row;align-items:stretch">
-  <div style="width:110px;flex-shrink:0;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border-radius:12px 0 0 12px;position:relative;cursor:pointer" onclick="${(p.imgs&&p.imgs.length>1)?'addToCart('+p.id+')':'showProdImg('+p.id+')'}">
+  <div style="width:110px;flex-shrink:0;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border-radius:12px 0 0 12px;position:relative;cursor:pointer" onclick="showProdImg(${p.id})">
     ${(()=>{const imgs=p.imgs&&p.imgs.length?p.imgs:(p.img?[p.img]:[]);if(!imgs.length) return '<div style="width:60px;height:60px;border-radius:10px;background:var(--bg5);display:flex;align-items:center;justify-content:center;font-size:24px">&#128230;</div>';return '<img src="'+imgs[0]+'" style="width:110px;height:110px;object-fit:contain;padding:8px">'+(imgs.length>1?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.5);color:white;font-size:10px;padding:2px 5px;border-radius:6px">+'+imgs.length+'</div>':'');})()}
   </div>
   <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;background:var(--bg1)">
@@ -507,25 +507,7 @@ function addToCart(id){
   const rawImgs=(Array.isArray(p.imgs)?p.imgs:[]).filter(Boolean);
   const imgs=rawImgs.length>1?rawImgs:(p.img?[p.img]:[]);
   if(imgs.length>1){
-    document.getElementById('imgSelTitle').textContent=p.name;
-    document.getElementById('imgSelPrice').textContent=fmt(p.price)+" so'm";
-    document.getElementById('imgSelBig').src=imgs[0];
-    const grid=document.getElementById('imgSelGrid');
-    grid.innerHTML='';
-    imgs.forEach(function(url,idx){
-      const div=document.createElement('div');
-      div.id='imgOpt_'+idx;
-      div.style.cssText='width:64px;height:64px;flex-shrink:0;border-radius:10px;border:2px solid #e5e7eb;overflow:hidden;cursor:pointer;background:#f8f8f6;transition:border-color .15s,background .15s';
-      div.onclick=(function(u,i){return function(){selectSaleImg(u,i);};})(url,idx);
-      const img=document.createElement('img');
-      img.src=url;
-      img.style.cssText='width:100%;height:100%;object-fit:contain;display:block;padding:4px;pointer-events:none';
-      div.appendChild(img);
-      grid.appendChild(div);
-    });
-    D.saleSelectedImg=imgs[0];
-    selectSaleImg(imgs[0],0);
-    document.getElementById('imgSelW').classList.add('show');
+    showProdImg(id,'select');
     return;
   }
   addToCartContinue();

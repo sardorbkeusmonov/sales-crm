@@ -557,27 +557,34 @@ function openDelConf(title,text,cb){
 function closeDelConf(){document.getElementById('delConfW').classList.remove('show');delCallback=null;}
 function execDel(){if(delCallback)delCallback();closeDelConf();}
 
-function showProdImg(prodId){
+function showProdImg(prodId,mode){
   const p=gP(prodId);
   if(!p)return;
   const imgs=p.imgs&&p.imgs.length?p.imgs:(p.img?[p.img]:[]);
   if(!imgs.length){showToast("Rasm qo'shilmagan");return;}
-  const old=document.getElementById('_imgOv');
-  if(old)old.remove();
-  const ov=document.createElement('div');
-  ov.id='_imgOv';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
-  ov.onclick=function(e){if(e.target===ov)ov.remove();};
-  const thumbs=imgs.length>1?'<div style="display:flex;gap:6px;padding:10px 16px;overflow-x:auto">'+imgs.map((url,i)=>'<img src="'+url+'" onclick="document.getElementById(\'_bigImg\').src=this.src" style="width:48px;height:48px;border-radius:8px;object-fit:cover;cursor:pointer;border:2px solid '+(i===0?'#185FA5':'#e5e7eb')+';flex-shrink:0">').join('')+'</div>':'';
-  ov.innerHTML='<div style="background:var(--bg1);border-radius:20px;overflow:hidden;width:min(340px,90vw);box-shadow:0 24px 64px rgba(0,0,0,.4);position:relative">'
-    +'<div style="background:var(--bg3);display:flex;align-items:center;justify-content:center;padding:16px;min-height:200px;position:relative">'
-    +'<img id="_bigImg" src="'+imgs[0]+'" style="max-width:100%;max-height:280px;object-fit:contain;display:block;border-radius:8px">'
-      +'<button onclick="this.closest(\'#_imgOv\') && document.getElementById(\'_imgOv\').remove()" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;line-height:1">&#215;</button>'
-    +'</div>'
-    +thumbs
-    +'<div style="padding:14px 16px"><div style="font-size:15px;font-weight:700;color:var(--c1)">'+p.name+'</div>'
-    +'<div style="font-size:14px;color:#185FA5;font-weight:600;margin-top:4px">'+fmt(p.price)+' so\'m</div></div></div>';
-  document.body.appendChild(ov);
+  const isSelect=mode==='select';
+  D.cartAddMode=isSelect;
+  D.pPid=prodId;
+  D.saleSelectedImg=imgs[0];
+  document.getElementById('imgSelTitle').textContent=p.name;
+  document.getElementById('imgSelPrice').textContent=fmt(p.price)+" so'm";
+  document.getElementById('imgSelBig').src=imgs[0];
+  document.getElementById('imgSelBtns').style.display=isSelect?'flex':'none';
+  const grid=document.getElementById('imgSelGrid');
+  grid.innerHTML='';
+  imgs.forEach(function(url,idx){
+    const div=document.createElement('div');
+    div.id='imgOpt_'+idx;
+    div.style.cssText='width:64px;height:64px;flex-shrink:0;border-radius:10px;border:2px solid #e5e7eb;overflow:hidden;cursor:pointer;background:#f8f8f6;transition:border-color .15s,background .15s';
+    div.onclick=(function(u,i){return function(){selectSaleImg(u,i);};})(url,idx);
+    const img=document.createElement('img');
+    img.src=url;
+    img.style.cssText='width:100%;height:100%;object-fit:contain;display:block;padding:4px;pointer-events:none';
+    div.appendChild(img);
+    grid.appendChild(div);
+  });
+  selectSaleImg(imgs[0],0);
+  document.getElementById('imgSelW').classList.add('show');
 }
 buildHints();
 
