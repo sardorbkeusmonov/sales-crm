@@ -11,10 +11,39 @@ Instagram-based Sales CRM for managing sales teams, inventory, delivery, and ana
 No build step — the app is pure HTML/CSS/JS served directly.
 
 - **Local dev:** Open `public/index.html` in a browser
-- **Deploy:** `firebase deploy` (requires Firebase CLI and login)
+- **Deploy (Firebase):** `firebase deploy` (requires Firebase CLI and login)
 - **Firebase project:** `sales-crm-82b62`
 
 No package.json, no bundler, no TypeScript, no test suite.
+
+### GitHub Pages Deploy (MUHIM)
+
+GitHub Pages `gh-pages` branch root dan serve qiladi. Lekin development fayllar `main` da `public/` papkasi ichida turadi. **Hech qachon `main → gh-pages` force push qilma** — bu `public/` strukturasini olib keladi va GitHub Pages ishlamaydi.
+
+Har safar GitHub Pages ga deploy qilish tartibi:
+
+```bash
+# 1. gh-pages worktree ni remote bilan sinxronlashtir
+git -C "C:/gh-pages-work" fetch origin
+git -C "C:/gh-pages-work" reset --hard origin/gh-pages
+
+# 2. main dagi o'zgarishlarni gh-pages ga qo'lda ko'chir
+#    (faqat public/ ichidagi fayllar: index.html, css/, js/, 404.html)
+git -C "C:/gh-pages-work" checkout origin/main -- public/
+
+# 3. public/ ichidagi fayllarni root ga ko'chir
+git -C "C:/gh-pages-work" mv public/index.html index.html
+git -C "C:/gh-pages-work" mv public/404.html 404.html
+git -C "C:/gh-pages-work" mv public/css css
+git -C "C:/gh-pages-work" mv public/js js
+
+# 4. Commit va push
+git -C "C:/gh-pages-work" commit -m "Deploy: ..."
+git -C "C:/gh-pages-work" push origin gh-pages
+```
+
+- **gh-pages worktree joylashuvi:** `C:/gh-pages-work`
+- **GitHub Pages URL:** `https://sardorbkeusmonov.github.io/sales-crm/`
 
 ## Architecture
 
