@@ -439,7 +439,7 @@ function setKpiPeriod() {}
 
 // ===== TELEGRAM XABARNOMA =====
 const TG_TOKEN = '7948798966:AAE-FSFuvAmW52abdq3wyISr-DkDn4LY_tg';
-const TG_CHAT = '-5256487011';
+const TG_CHAT = '-1004467796899';
 
 async function sendTelegramNotification(sale){
   try{
