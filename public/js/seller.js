@@ -725,14 +725,13 @@ window.confirmSell = async function(){
   };
   D.sales.push(sale);
   if(window.FS) window.FS.addSale(sale);
-  console.log('[TG] sendTelegramNotification chaqirilmoqda, sale:', sale.orderId);
-  sendTelegramNotification(sale);
   D.cart=[];
   closeConf();
   renderCartBar();
   showToast('Buyurtma qabul qilindi! ('+items.length+' ta mahsulot)');
   renderSotuv();
   renderMyD();
+  try{sendTelegramNotification(sale);}catch(e){console.error('TG call error:',e);}
   _sellLock=false;
 }
 function closeConf(){
