@@ -300,15 +300,6 @@ function renderMyOrders(){
     +_pagin;
 }
 
-function setMyOrdersPage(page){
-  window._myOrdersPage=page;
-  renderMyOrders();
-}
-
-function setDeliveryPage(page){
-  window._deliveryPage=page;
-  renderDelivery();
-}
 let _pendingStatusEl=null, _pendingStatus=null;
 function _confirmStatusChange(){
   document.getElementById('_statusConfW').classList.remove('show');
